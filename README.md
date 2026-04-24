@@ -1,389 +1,443 @@
-# PT KMIL — Work Order System V31
+# PT KMIL — Barcode Work Order System `V32`
 
-> **Multi-division, single-file web application** for managing work orders (WS) from Marketing through Engineering, PPIC, Production, QC, and Accounting — with QR code generation, real-time tracking, Google Sheets sync, and PWA support.
+<div align="center">
 
----
+![Version](https://img.shields.io/badge/version-V32-8b5cf6?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyTDIgN2wxMCA1IDEwLTV6TTIgMTdsOSA1IDktNXYtNWwtOSA1LTktNXoiLz48L3N2Zz4=)
+![Platform](https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-8b5cf6?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-Production--Ready-10b981?style=for-the-badge)
+![License](https://img.shields.io/badge/license-Proprietary-f97316?style=for-the-badge)
 
-## 📋 Table of Contents
+**Single-file PWA · Multi-division Work Order management · Real-time QR scanning**
 
-- [Overview](#overview)
-- [Features](#features)
-- [Divisions & Modules](#divisions--modules)
-- [Tools](#tools)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Google Sheets Integration](#google-sheets-integration)
-- [User Accounts](#user-accounts)
-- [Customers](#customers)
-- [Production Operations](#production-operations)
-- [Data Storage](#data-storage)
-- [Version History](#version-history)
-- [File Structure](#file-structure)
+*Dibangun untuk transformasi operasional PT KMIL — transparansi, akuntabilitas, dan efisiensi seluruh divisi*
+
+</div>
 
 ---
 
-## Overview
+## 📋 Overview
 
-PT KMIL System is a **zero-dependency, single HTML file** industrial work order management system. It covers the full lifecycle of a manufacturing work order — from initial order creation in Marketing, through Engineering drawing release, PPIC material planning, Production tracking, Quality Control, and final delivery confirmation.
-
-The system works **offline-first** using `localStorage`, with optional sync to Google Sheets via a Google Apps Script (GAS) backend. It includes QR code generation for every Work Order (WS), barcode scanner support, and a print-ready report system.
+PT KMIL Barcode System adalah aplikasi **Progressive Web App (PWA)** berbasis single HTML file untuk manajemen Work Order (WS) lintas divisi secara real-time. Sistem ini menggantikan proses manual dengan alur kerja digital yang terintegrasi, mulai dari pembuatan order di Marketing hingga pengiriman di Accounting.
 
 ```
-Order Created → Drawing Released → BOM Released → Production → QC → Delivered
-   Marketing       Engineering          PPIC          Production    QC    Accounting
+Marketing → Engineering → PPIC → Production → QC → Accounting
+              ↕              ↕           ↕
+           Drawing        BOM        Serah Terima
 ```
 
 ---
 
-## Features
+## ✨ Features
 
-### Core
-- ✅ **Single HTML file** — no build step, no server required, open directly in browser
-- ✅ **PWA ready** — installable on mobile and desktop (iOS, Android, Chrome)
-- ✅ **Offline-first** — all data stored in `localStorage`, syncs to Sheets when online
-- ✅ **QR Code generation** for every Work Order (WS number encoded)
-- ✅ **Barcode scanner support** — plug in a USB scanner or scan via camera
-- ✅ **Dark / Light theme** toggle
-- ✅ **Mobile responsive** with bottom navigation bar
+### 🏭 Core System
+| Feature | Detail |
+|---|---|
+| **Multi-Division Workflow** | Marketing, Engineering, PPIC, Purchasing, Production, QC, Accounting |
+| **QR Code / Barcode Scan** | Physical scanner + Camera scan (iOS & Android) |
+| **Google Sheets Sync** | Real-time push via Google Apps Script |
+| **Local Storage Backup** | Offline-capable data persistence |
+| **PWA Ready** | Installable di iOS (Add to Home Screen) & Android |
+| **Work Order Tracking** | Status per-divisi dengan timeline lengkap |
+| **Material List (BOM)** | PPIC input → auto-sync ke Produksi & QC |
+| **QC Gating** | Password-protected, akses terbatas |
+| **COO Dashboard** | KPI management view untuk eksekutif |
+| **QR Finder** | Generate & cetak QR Code per WS |
 
-### Work Order Types
-- 📦 **Single Part** — standard one-part work order
-- 🔩 **Assembling** — multi-child WS (e.g. `26003131-01`, `-02`, ...) with per-part production tracking
+### 📷 Camera QR Scanner (V32 New)
+| Feature | Detail |
+|---|---|
+| **Rear Camera Default** | Otomatis pakai kamera belakang (environment) |
+| **Auto-detect** | Decode QR dalam < 1 detik menggunakan jsQR |
+| **Auto-use** | QR valid langsung trigger `processScan` otomatis |
+| **Torch / Flash** | Toggle flashlight saat kondisi gelap |
+| **Flip Camera** | Switch kamera depan ↔ belakang |
+| **Haptic Feedback** | Vibrate saat QR berhasil di-scan |
+| **Fallback Input** | Manual input jika kamera tidak tersedia |
+| **iOS Safari** | Kompatibel penuh dengan `playsinline` + `getUserMedia` |
+| **Android Chrome** | Rear camera constraint optimal untuk warehouse |
 
-### Tracking & Search
-- 🔍 Track any WS by **WS number**, **Customer**, or **PO number**
-- 🔍 Full support for **child WS tracking** — search `26003131-01` shows both parent and child events
-- 📊 Timeline view of all events per WS
-- 🚨 Deadline expiry warnings and color-coded status
-
-### Print
-- 🖨️ **Work Order Event Log** — full history per WS including Assembling Parts table
-- 🖨️ **Production Assembling Parts Log** — standalone print per WS with columns: NO_WS Child, Part/Item, Operator, Operation, Shift, Qty, Status
-- 🖨️ **QR Code** — single or batch print all WS QR codes
-- 🖨️ **Deadline List** — sorted by nearest/furthest deadline
-- 🖨️ **Serah Terima (Handover) Log**
-- 🖨️ **Downtime Machine Grid** — monthly machine status calendar
-- 🖨️ **Management Dashboard Report** — executive summary CSV + print
+### 🎨 UI / UX (V32)
+- **Purple Industrial Theme** — full dark purple palette `#8b5cf6 → #6d28d9`
+- **Spark Particle System** — ambient + click burst + button hover
+- **Rotating Gear Animation** — ambient industrial decoration
+- **Uptime Piston Badge** — live session timer di topbar
+- **Police Line Warnings** — hazard tape sebelum save di Production & PPIC
+- **T&C Screen** — muncul otomatis setelah splash, compliance barcode system
+- **Scanline / HUD Overlay** — CRT scanlines + corner brackets
+- **Stagger Animations** — entrance animation per elemen
 
 ---
 
-## Divisions & Modules
+## 🚀 Quick Start
+
+### Cara Pakai (Tanpa Install)
+1. Download file `V32_Industrial_Purple_kmil.html`
+2. Buka di browser modern (Chrome / Safari)
+3. Baca & setujui T&C → masuk ke dashboard
+4. Isi **Settings (⚙️)** → masukkan Google Apps Script URL
+5. Klik **☁️ Load from Sheets** untuk sync data
+
+### Install sebagai PWA
+**Android (Chrome):**
+1. Buka file di Chrome
+2. Tap menu `⋮` → **"Add to Home Screen"**
+3. Konfirmasi → icon PT KMIL muncul di home
+
+**iOS (Safari):**
+1. Buka file di Safari
+2. Tap **Share** `⬆️` → **"Add to Home Screen"**
+3. Konfirmasi → app tersimpan dengan nama *PT KMIL*
+
+---
+
+## 📷 Cara Pakai Camera QR Scanner
+
+Scanner tersedia di semua divisi yang memiliki input NO_WS:
+
+```
+Engineering · PPIC · Production · QC · Accounting
+```
+
+**Langkah penggunaan:**
+1. Buka divisi (contoh: Production)
+2. Tap tombol **📷** di sebelah input NO_WS
+3. Izinkan akses kamera saat diminta browser
+4. Arahkan kamera ke QR Code pada surat WS
+5. QR terdeteksi → muncul hasil → otomatis proses dalam 1 detik
+
+**Tips lapangan:**
+- Gunakan **🔦 Flash** saat cahaya kurang (gudang, malam)
+- Gunakan **🔄 Flip** untuk switch ke kamera depan jika perlu
+- Jika kamera tidak bisa diakses → ketik NO_WS manual di fallback input
+
+> **Note iOS:** Buka via Safari, bukan Chrome/Firefox — hanya Safari yang punya akses `getUserMedia` di iOS
+
+---
+
+## 🏗️ Arsitektur
+
+```
+V32_Industrial_Purple_kmil.html  (single file, ~560 KB)
+│
+├── <head>
+│   ├── Fonts: Barlow Condensed, Barlow, IBM Plex Mono (Google Fonts)
+│   ├── jsQR 1.4.0 (QR decode library, CDN)
+│   └── <style> — 1,400+ lines CSS
+│       ├── Design System (CSS Variables, Purple Palette)
+│       ├── Component Library (topbar, sidebar, cards, forms)
+│       ├── Motion Engine (30+ keyframe animations)
+│       ├── T&C Screen
+│       ├── Police Line Warning
+│       └── Camera Scanner
+│
+├── <body>
+│   ├── T&C Compliance Screen
+│   ├── Splash Screen (logo + progress)
+│   ├── Topbar (brand + clock + status + uptime)
+│   ├── Sidebar (navigation per divisi)
+│   ├── Mobile Bottom Nav
+│   ├── Views (Marketing, Engineering, PPIC, Purchasing,
+│   │          Production, QC, Accounting, Track, Reject,
+│   │          COO/Management, Flow Diagram)
+│   ├── Modals (Config, Mass Lookup, MKT Warning, Shortcuts)
+│   └── Camera QR Scanner Modal
+│
+└── <script> — ~3,000+ lines JS
+    ├── Data Layer (localStorage, GAS sync)
+    ├── Scan Engine (processScan, clearScan)
+    ├── Form Logic (per-divisi)
+    ├── QR Generator (qrcodejs)
+    ├── Material List (PPIC BOM)
+    ├── Serah Terima / Timeline
+    ├── COO KPI Dashboard
+    ├── Animation Engine (sparks, gears, piston)
+    └── Camera Scanner Engine (openCamScan, jsQR loop)
+```
+
+---
+
+## 🔌 Google Apps Script Setup
+
+Sistem sync ke Google Sheets melalui Google Apps Script (GAS).
+
+**Langkah Setup GAS:**
+1. Buka [script.google.com](https://script.google.com)
+2. Buat project baru
+3. Deploy sebagai **Web App** → akses: *Anyone*
+4. Copy URL deploy
+5. Paste di aplikasi: **⚙️ Settings → GAS URL → Save**
+
+**Struktur Sheet yang dibutuhkan:**
+
+| Sheet Name | Keterangan |
+|---|---|
+| `Events` | Semua event dari semua divisi |
+| `Materials` | BOM / Material list dari PPIC |
+| `Config` | Konfigurasi sistem |
+
+---
+
+## 📱 Divisi & Fitur Per-Divisi
 
 ### 📋 Marketing
-Creates and manages work orders.
-
-| Field | Description |
-|-------|-------------|
-| Customer | Select from master list or custom |
-| NO_WS | Work Order number (e.g. `26020017`) |
-| NO_PO | Purchase Order number |
-| Part Name | Description of part |
-| Deadline PO | Due date — shown in red when expired |
-| Qty | Quantity (with confirmation warning) |
-| Remarks | Optional notes |
-
-**Events:** `Order Created`, `Drawing Tambahan`, `NO DRAWING`
-
-**Features:**
-- Tabs for **Single Part** vs **Assembling** order types
-- Assembling: auto-generates child WS range (e.g. `-01` to `-05`) with qty per child
-- Drawing upload with thumbnail preview and Vault storage
-- QR Code Finder — search, select, and print any WS QR with child WS qty table
-- Save warning modal — confirms all fields before submitting
-
----
+- Input order baru (Single Part / Assembling)
+- Upload drawing (link URL)
+- Generate NO_WS otomatis
+- QR Finder: generate & cetak QR Code WS
+- Warning modal konfirmasi sebelum save
 
 ### ⚙️ Engineering
-Drawing approval and release to PPIC.
-
-**Events:** `Wait Approval Drawing`, `Drawing Released`, `Drawing Tambahan`
-
-**Features:**
-- Scan/type WS to auto-fill customer, PO, deadline, part name
-- Auto-detects WS type (Single Part or Assembling) from Marketing data
-- Drawing Tambahan: revision number selector
-- **WS Turun ke PPIC** — track which child WS drawings have been released (checklist with progress bar)
-- Users: Andry, Fadhil, Pram, Heri
-
----
+- Scan WS → auto-fill dari Marketing
+- Approval drawing
+- Drawing release / tambahan
+- Camera QR scan support
 
 ### 📦 PPIC
-Planning, BOM, and raw material list management.
-
-**Events:** `BOM Released`, `Drawing Tambahan`, `Revision Drawing`, `Material Problem`
-
-**Features:**
-- Scan/type WS to auto-fill from Marketing
-- **Raw Material List table** — per-item entry with: Name, Item Type, Place Process, Material grade, Dimensions (L×W×T mm), Qty, Material Source, Harden/HRC
-- Material list syncs automatically to Production and QC
-- WS Reference panel shows all child WS for Assembling orders
-- User: Kiki (locked)
-
-**Material fields:**
-```
-Name | Item Type | Place Process | Material | Ø Dia | L × W × T | Qty | Source | Harden | HRC | Notes
-```
-
-**Material types:** SS400, SKD11, SKD61, S45C, SCM440, SPHC, AB2, SUS304, SUS316, SUS201, SUS410, PIPE, AS PUTIH, STD PART, FCD60, FCD70, CASTING, RUBBER, PEJAL, CUSTOM
-
-**Place/Process codes:** CDR, BTG, JBBK, SETU, SUBCONT, MCP, CPM, MBW, CUSTOM
-
----
+- Scan WS → load referensi dari Marketing
+- Input BOM / Material List
+- Sync material ke Production & QC
+- Police line warning sebelum simpan
 
 ### 🏭 Production
-Operation tracking, assembling part logging, and handover (serah terima).
-
-**Events:** `Production - OP Start`, `Revision Drawing`, `Material Problem`
-
-**Features:**
-- Auto-detects Single Part vs Assembling from Marketing/PPIC data
-- **Single Part mode:** Shift, Operation, Qty
-- **Assembling mode:** per-child-WS table with NO_WS Child, Part/Item, Operator, Operation, Shift, Qty, Status
-- Material list from PPIC shown for reference
-- **Serah Terima (S/T)** log — record handover date, qty, and status (Parsial/Complete) per child WS
-- Print Assy Parts — standalone print of assembling production log
-- Operators: DAYAT, HADRAH, NANA, AMSORI, AGUS, HENDRIYANA, ANDREAS, NANANG, WAHYUDI, DAVID, JOHAN
-
-**Operations:**
-```
-BUBUT - Manual | CNC - TC | CNC - MC
-MILLING - Manual | MILLING - HBM | MILLING - Planner | MILLING - BOKO
-GRINDING - Cylindrical | GRINDING - Grinding | GRINDING - Surface
-B/W | INDUCTION | WELDING | LASERCUT | SUBCONT (→ PPIC)
-```
-
----
+- Scan WS → auto-fill + load material PPIC
+- Input event operasional (OP Start, dll)
+- Single Part & Assembling mode
+- Serah Terima ke QC
+- Camera QR scan support
+- Police line warning sebelum save
 
 ### ✅ QC (Quality Control)
-Inspection and final quality gate — **login protected**.
+- Password-gated access
+- Incoming check, QC OK, Repair, Reject, Special Acceptance
+- Bulk input material check dari PPIC
+- Camera QR scan support
 
-**Events:** `Incoming Check`, `QC OK`, `Repair Required`, `Reject / NG`, `Special Acceptance`
+### 🚚 Accounting & Finance
+- Scan WS untuk konfirmasi pengiriman
+- Customer Delivered event
+- Camera QR scan support
 
-**Features:**
-- Login required: User ID + Password
-- Scan/type WS — auto-detects Single Part or Assembling
-- Material list from PPIC displayed with per-item qty and status
-- Parsial QC qty — forces Remarks if qty < full qty
-- Event warnings for Reject/NG and Repair Required
-- Users (ID : Password): `erik : qc1`
+### 📡 Track WS
+- Cari riwayat lengkap per WS
+- Timeline event seluruh divisi
+- Material list dari PPIC
 
----
-
-### 🚚 Customer & A/F (Accounting)
-Delivery confirmation and finance.
-
-**Events:** `Customer - Delivered`
-
-**Features:**
-- Scan WS to auto-fill customer, PO, part name
-- Full / Parsial delivery selection
-- Surat Jalan (SJ) photo/file upload
-- Delivery proof stored in Bukti Pengiriman vault
-- Users: Raynold, Veny, Lasma, Putri
+### 👔 COO / Management
+- Password-protected
+- KPI dashboard (total WS, reject rate, delivery)
+- Downtime monitoring grid
+- Laporan bulanan
 
 ---
 
-## Tools
+## 🎨 Design System
 
-| Tool | Description |
-|------|-------------|
-| 📡 **Track WS** | Search by WS number, Customer, or PO. Supports child WS (e.g. `26003131-01`). Shows full event timeline, material list, and print button per WS |
-| 🔧 **Downtime Mesin** | Monthly machine status grid (OK / Problem / Off). Click cells to toggle. Save to localStorage. Print monthly report |
-| 🔄 **Flow Diagram** | SVG diagram of the full work order process from Marketing to delivery |
-| 🏷️ **Katalog QR WS Assembling** | Browse and print QR codes for all Assembling WS and their child WS |
-| 📊 **Item Stock** | Simple stock count tracker per customer / WS / item name |
-| 🚫 **Item Reject / NG** | View and filter all Reject and Repair events across all WS |
-| 📐 **Drawing Vault** | All uploaded drawings — filterable by customer or WS. Click to preview |
-| 📮 **Bukti Pengiriman** | All delivery proof photos (SJ) from Accounting |
-| 👔 **Management Dashboard** | Executive overview — login protected (`elim : coo`). KPI grid, pipeline chart, WS table with status, reject summary, top customers. Export CSV |
+### Color Palette (Purple Industrial)
+
+```css
+--bg:       #07060f   /* Deep space black  */
+--surface:  #0d0b1a   /* Dark navy         */
+--card:     #13102a   /* Card background   */
+--accent:   #8b5cf6   /* Primary violet    */
+--text:     #d8d4f0   /* Soft white        */
+--muted:    #6b5f90   /* Muted purple      */
+
+/* Per-division colors */
+--mkt:  #a855f7   /* Marketing  — Purple  */
+--eng:  #3b82f6   /* Engineering — Blue   */
+--ppic: #7c3aed   /* PPIC        — Violet */
+--prd:  #f97316   /* Production  — Orange */
+--qc:   #10b981   /* QC          — Green  */
+--acc:  #ec4899   /* Accounting  — Pink   */
+```
+
+### Typography
+| Role | Font | Weight |
+|---|---|---|
+| Display / Headings | Barlow Condensed | 800–900 |
+| Body | Barlow | 400–600 |
+| Monospace / Data | IBM Plex Mono | 400–700 |
 
 ---
 
-## Tech Stack
+## ⚠️ Police Line Warnings
 
-| Component | Detail |
-|-----------|--------|
-| **Runtime** | Pure HTML + Vanilla JavaScript (ES2020) |
-| **Styling** | CSS custom properties, no framework |
-| **Fonts** | Barlow Condensed, Barlow, IBM Plex Mono (Google Fonts) |
-| **QR Code** | [qrcodejs](https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js) via CDN |
-| **Charts** | HTML5 Canvas (custom bar + pie charts) |
-| **Storage** | `localStorage` (offline-first) |
-| **Backend** | Google Apps Script (optional, for Sheets sync) |
-| **PWA** | Web App Manifest meta tags, installable |
+Ditampilkan otomatis sebelum tombol save di:
+
+**Production** — `💾 Save to Sheets`
+```
+⚠ WARNING ⚠ WARNING ⚠ WARNING ⚠
+PERIKSA KEMBALI SEBELUM MENYIMPAN!
+Pastikan semua data sudah BENAR dan LENGKAP
+```
+
+**PPIC** — `💾 Simpan List Material`
+```
+⚠ PERIKSA ⚠ PERIKSA ⚠ PERIKSA ⚠
+PERIKSA LIST MATERIAL SEBELUM MENYIMPAN!
+Pastikan nama material, qty, dan satuan sudah benar.
+```
 
 ---
 
-## Getting Started
+## 📜 Terms & Conditions
 
-### 1. Open the file
+T&C Compliance Screen muncul otomatis setelah splash animation setiap kali membuka aplikasi (kecuali user centang "Jangan tampilkan lagi di sesi ini").
+
+**Isi T&C mencakup:**
+1. Kewajiban Penggunaan Sistem
+2. Akurasi dan Tanggung Jawab Data
+3. Kepatuhan Proses Workflow
+4. Real-Time Execution
+5. Audit & Monitoring
+6. Sanksi Pelanggaran ⚠️
+7. Komitmen Keberlangsungan Perusahaan
+
+User harus klik **"Saya Setuju & Masuk ke Dashboard"** untuk melanjutkan.
+
+---
+
+## 🔐 Keamanan & Akses
+
+| Area | Proteksi |
+|---|---|
+| QC | Password per-session |
+| COO / Management | Password terpisah |
+| T&C | Wajib setuju setiap sesi |
+| GAS URL | Disimpan di localStorage, tidak terekspos |
+
+---
+
+## 📦 Dependencies
+
+| Library | Version | Source | Fungsi |
+|---|---|---|---|
+| jsQR | 1.4.0 | CDN jsDelivr | Decode QR dari kamera |
+| qrcodejs | 1.0.0 | CDN Cloudflare | Generate QR Code |
+| Barlow Condensed | — | Google Fonts | Display font |
+| IBM Plex Mono | — | Google Fonts | Monospace / data |
+
+> Semua dependency diload via CDN — tidak perlu `npm install` apapun.
+
+---
+
+## 🔄 Changelog
+
+### V32 (Current) — *April 2025*
+- ✅ **Camera QR Scanner** — iOS & Android, jsQR, haptic, torch, flip
+- ✅ **Purple Industrial Theme** — full palette migration
+- ✅ **T&C Compliance Screen** — post-splash, 7 ketentuan, stagger animation
+- ✅ **Police Line Warnings** — Production & PPIC save confirmation
+- ✅ **Spark Particle System** — ambient + click + hover bursts
+- ✅ **Rotating Gear** — SVG ambient decoration
+- ✅ **Uptime Piston Badge** — live session timer
+- ✅ **HUD Corner Brackets** — industrial overlay
+- ✅ **Scanline / Grid Overlay** — CRT texture
+- ✅ **Topbar Height** — 48px → 52px
+- ✅ **Size System Refinement** — proportional typography & spacing
+
+### V31
+- QR Finder module
+- Assembling WS type support
+- COO / Management dashboard
+- Serah Terima system
+- Mass lookup modal
+
+### V30
+- Multi-division workflow
+- Google Sheets sync
+- Material list (BOM)
+- QC access gate
+
+---
+
+## 🛠️ Development
+
+### Edit & Deploy
+Karena ini single-file app, tidak perlu build process:
+
 ```bash
-# No installation required — just open in a modern browser
-open V31_Industrial.html
+# Edit langsung file HTML
+code V32_Industrial_Purple_kmil.html
+
+# Test di local server (opsional, untuk kamera perlu HTTPS)
+npx serve .
+# atau
+python3 -m http.server 8080
 ```
 
-Or host it on any static file server, GitHub Pages, or Google Drive.
+> **Penting:** Camera `getUserMedia` membutuhkan **HTTPS** atau **localhost**.  
+> Untuk testing kamera di jaringan lokal, gunakan `ngrok` atau deploy ke GitHub Pages.
 
-### 2. Configure Google Sheets (optional)
-1. Click **⚙️** (Settings) in the top-right
-2. Paste your Google Apps Script Web App URL
-3. Click **Save**
-4. Click **☁️ Load from Sheets** to pull existing data
+### Deploy ke GitHub Pages
+```bash
+git init
+git add V32_Industrial_Purple_kmil.html
+git commit -m "feat: V32 Purple Industrial release"
+git branch -M main
+git remote add origin https://github.com/YOUR_ORG/kmil-system.git
+git push -u origin main
+# Enable GitHub Pages → Settings → Pages → Deploy from main
+```
 
-> Without GAS URL configured, all data is saved locally only. The "Save to Sheets" button will fail gracefully without breaking local save.
-
-### 3. Start using
-1. Go to **Marketing** → fill in customer, WS number, PO, part, deadline
-2. Click **💾 Save** → data appears in the right-panel timeline
-3. Each division scans the WS QR code to auto-fill their form
-4. Track progress anytime in **Track WS**
+URL format: `https://YOUR_ORG.github.io/kmil-system/V32_Industrial_Purple_kmil.html`
 
 ---
 
-## Google Sheets Integration
+## 🐛 Troubleshooting
 
-The system communicates with a Google Apps Script (GAS) Web App deployed from a Google Sheet. The GAS endpoint handles:
-
-| Action | Description |
-|--------|-------------|
-| `listEvents` | Pull all events from Sheet (JSONP) |
-| `saveEvent` | Push a new event row |
-| `generateWsRange` | Bulk-create child WS rows for Assembling orders |
-
-**JSONP** is used for cross-origin requests (no CORS issue). The payload structure per event:
-
-```json
-{
-  "ts": "2026-04-24T...",
-  "department": "Marketing",
-  "event": "Order Created",
-  "status": "CREATED",
-  "no_ws": "26020017",
-  "no_po": "N309195",
-  "customer": "KPI",
-  "part": "ROLL F3 YN 323",
-  "deadline": "2026-06-30",
-  "qty": 5,
-  "user": "Dicky S",
-  "ws_type": "SINGLE_PART",
-  "remarks": ""
-}
-```
-
-For Assembling (Production), additional fields:
-```json
-{
-  "assy_parts": [
-    { "ws": "26003131-01", "partName": "Body", "operator": "DAYAT", "op": "CNC - TC", "shift": "Shift 1", "qty": 1, "status": "DONE" }
-  ],
-  "assy_parts_summary": "26003131-01:DAYAT:CNC - TC:1"
-}
-```
+| Masalah | Solusi |
+|---|---|
+| Kamera tidak muncul (iOS) | Gunakan Safari, bukan Chrome/Firefox |
+| "Izin kamera ditolak" | Settings → Safari/Chrome → Camera → Allow |
+| QR tidak terbaca | Pastikan pencahayaan cukup, aktifkan Flash 🔦 |
+| Data tidak sync ke Sheets | Cek GAS URL di Settings, pastikan deploy ulang Script |
+| T&C muncul terus | Centang "Jangan tampilkan lagi" atau clear localStorage |
+| Kamera lambat decode | Kurangi jarak ke QR, jaga agar tidak blur |
+| Layout rusak di iOS | Gunakan Safari versi terbaru |
 
 ---
 
-## User Accounts
+## 📊 Browser Support
 
-| Division | User | Credential |
-|----------|------|------------|
-| Marketing | Dicky S | *(no login — auto-assigned)* |
-| Engineering | Andry, Fadhil, Pram, Heri | *(select from dropdown)* |
-| PPIC | Kiki | *(locked — auto-assigned)* |
-| Production | Select from operator list | *(dropdown)* |
-| QC | Erik | `erik` / `qc1` |
-| Accounting | Raynold, Veny, Lasma, Putri | *(select from dropdown)* |
-| Management Dashboard | Elim | `elim` / `coo` |
+| Browser | Camera | QR Scan | PWA |
+|---|---|---|---|
+| Chrome Android | ✅ | ✅ | ✅ |
+| Safari iOS ≥ 14.3 | ✅ | ✅ | ✅ (A2HS) |
+| Chrome Desktop | ✅ | ✅ | ✅ |
+| Firefox | ⚠️ | ⚠️ | ❌ |
+| Samsung Internet | ✅ | ✅ | ✅ |
 
 ---
 
-## Customers
-
-The master customer list (A–Z):
-
-| | | | |
-|-|-|-|-|
-| AHM | ASTEMO | BAKRIE PIPE | BEKAERT |
-| BINA PERTIWI | BUMA | EDICO | HPU |
-| KE | KMIL | KOMATSU | KPI |
-| KPP | MBW | MCP | PINDAD |
-| POSCO | SANKEI | SEAPI | STOCKLIN |
-| TENARIS SPIJ | UNION FOODS | UTPE | *(Custom...)* |
-
----
-
-## Production Operations
+## 👨‍💼 Credit
 
 ```
-Bubut    : BUBUT - Manual
-CNC      : CNC - TC, CNC - MC
-Milling  : MILLING - Manual, MILLING - HBM, MILLING - Planner, MILLING - BOKO
-Grinding : GRINDING - Cylindrical, GRINDING - Grinding, GRINDING - Surface
-Other    : B/W, INDUCTION, WELDING, LASERCUT, SUBCONT (→ PPIC)
+System Design & Development
+  Elim K — PT KMIL Digital Operations
+  Built 2024–2026
+
+Stack
+  Vanilla HTML · CSS · JavaScript
+  No framework. No build tool. No npm.
+  Just one file that works everywhere.
 ```
 
 ---
 
-## Data Storage
+## 📄 License
 
-All data is persisted in `localStorage` under these keys:
+**Proprietary** — PT KMIL Internal Use Only
 
-| Key | Contents |
-|-----|----------|
-| `kmil_v10_events` | All work order events (main data array) |
-| `kmil_v2_config` | App config (GAS URL, theme) |
-| `kmil_v10_drawings` | Drawing thumbnails and metadata per WS |
-| `kmil_v10_mats` | PPIC material lists per WS |
-| `kmil_v10_dt` | Downtime machine grid data |
-| `kmil_v10_sj` | Surat Jalan / delivery proof per WS |
-| `kmil_v10_st` | Serah Terima (handover) data per WS |
-| `kmil_v11_stock` | Item stock entries |
-| `kmil_v13_eng_assy` | Engineering per-child-WS drawing release checklist |
-
-> ⚠️ `localStorage` is browser and origin scoped. If you open the file from a different path or browser, data will not carry over. Use **Sheets sync** for persistence across devices.
+Sistem ini merupakan properti PT KMIL. Dilarang mendistribusikan, mereplikasi, atau menggunakan sistem ini di luar lingkungan PT KMIL tanpa izin tertulis dari Management.
 
 ---
 
-## Version History
+<div align="center">
 
-| Version | Changes |
-|---------|---------|
-| **V31** | Fix `const` inside unbraced `switch case` (Engineering save buttons broken). Production Assembling Parts print (`🖨️ Print Assy Parts`). Assy parts detail in Work Order Event Log print. Timeline shows assy parts preview badge. |
-| **V31** (debug) | Track WS: child WS support (`26003131-01`). Customer filter case-insensitive fix. Child WS shows parent events when no own events exist. Child badge in track card. |
-| **V31** (revisions) | Management Dashboard (renamed from COO). Customer list A–Z + 10 new customers. QR Finder print shows child WS qty table. Track WS / Scan support for child WS. Downtime print button. |
-| **V30** | Initial multi-division release. QR code system. Google Sheets sync. Assembling order type. PPIC material list. QC login gate. Drawing Vault. Serah Terima log. |
+**PT KMIL Barcode System V32**  
+*Bersatu Kita Hebat*
 
----
+`⚙️ Industrial · 📷 Camera · 🟣 Purple · 📋 Compliance`
 
-## File Structure
-
-```
-V31_Industrial.html          ← Entire application (single file)
-README.md                    ← This file
-```
-
-The application is intentionally a **single self-contained HTML file** for maximum portability — no npm, no bundler, no dependencies to install. Deploy anywhere that can serve a static file.
-
----
-
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| `/` | Focus scan / search input |
-| `Esc` | Close dialog or lightbox |
-| `?` | Show shortcuts panel |
-| `Alt + 1` | Go to Marketing |
-| `Alt + 2` | Go to Engineering |
-| `Alt + 3` | Go to PPIC |
-| `Alt + 5` | Go to Production |
-| `Alt + 6` | Go to QC |
-| `Alt + T` | Go to Track WS |
-| `Alt + D` | Go to Dashboard |
-
-Barcode scanner (USB HID) is supported — scan into any active input field or anywhere on the page (auto-routes to visible scan input).
-
----
-
-## License
-
-Internal tool — PT KMIL. All rights reserved.
+</div>
