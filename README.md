@@ -1,195 +1,347 @@
-# PT KMIL — Barcode Work Order System `V33`
+# PT KMIL System — V39
 
-<div align="center">
+> **Single-file industrial Work Order tracking system** with QR code scanning, Google Sheets sync, multi-division workflow, and offline-first architecture.
 
-![Version](https://img.shields.io/badge/version-V33-8b5cf6?style=for-the-badge)
-![Camera](https://img.shields.io/badge/Camera-QR%20Scan-10b981?style=for-the-badge)
-![Platform](https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-8b5cf6?style=for-the-badge)
-![Status](https://img.shields.io/badge/status-Production--Ready-10b981?style=for-the-badge)
-
-**Single-file PWA · Multi-division Work Order · Real-time Camera QR Scan · Auto-fill**
-
-</div>
+[![Version](https://img.shields.io/badge/version-V39-purple)](https://elim28-design.github.io/PT_KMIL_Barcodesys/)
+[![Type](https://img.shields.io/badge/type-Single%20HTML%20File-blue)](#)
+[![Storage](https://img.shields.io/badge/storage-LocalStorage%20%2B%20Google%20Sheets-green)](#)
 
 ---
 
-## 🆕 What's New in V33
+## Daftar Isi
 
-### 📡 Track WS — Camera QR Scan
-Camera scan button added to **Track WS** search. Tap 📷 → scan QR → auto-loads full history.
-
-### 🧮 Smart QR Formula Parser
-Handles any QR format from any printer/scanner system:
-
-| Input Format | Example | Result |
-|---|---|---|
-| Plain WS | `26020036` | `26020036` |
-| Child WS | `26020036-01` | `26020036-01` |
-| Pipe-delimited | `26020036\|STOCKLIN\|PO-123` | `26020036` |
-| JSON encoded | `{"ws":"26020036"}` | `26020036` |
-| URL params | `ws=26020036&cust=STOCKLIN` | `26020036` |
-| With prefix | `WS:26020036` | `26020036` |
-| Scanner noise | `26020036\x00\r` | `26020036` |
-
-### ✨ Auto-fill Visual Feedback
-When QR is scanned from camera in any division:
-- Form fields **flash purple** one by one (staggered 60ms each)
-- Scan result box border glows purple  
-- Toast: `✓ Auto-fill dari QR scan berhasil`
-
-### ⌨️ Physical Barcode Scanner Buffer
-Zebra, Honeywell, and other hardware scanners type characters in `< 60ms` bursts. V33 detects rapid keystrokes and shows visual feedback before the Enter is sent.
-
-### 🐛 Critical Bug Fix: `_dept` Race Condition
-**V32 bug:** Camera close set `_dept = null` at same time `processScan(_dept)` was called → auto-fill never worked on iOS.  
-**V33 fix:** `var dept = _dept` captured before `closeCamScan()`.
+- [Overview](#overview)
+- [Fitur Utama](#fitur-utama)
+- [Alur Kerja per Divisi](#alur-kerja-per-divisi)
+- [Arsitektur Teknis](#arsitektur-teknis)
+- [Setup & Konfigurasi](#setup--konfigurasi)
+- [Struktur Data](#struktur-data)
+- [Changelog](#changelog)
+- [Known Issues](#known-issues)
 
 ---
 
-## 📷 Camera QR Scan — All Divisions
+## Overview
 
-| Division | Camera Available | Auto-fills |
-|---|---|---|
-| Engineering | ✅ | NO_WS, Customer, NO_PO, Deadline, Part Name |
-| PPIC | ✅ | NO_WS, Customer, NO_PO, Deadline, Part Name |
-| Production | ✅ | NO_WS, Customer, Part Name |
-| QC | ✅ | NO_WS, Customer, Part Name |
-| Accounting | ✅ | NO_WS, Customer, NO_PO, Part Name |
-| **Track WS** | ✅ **New V33** | Auto-search history |
+PT KMIL System adalah aplikasi berbasis browser **satu file HTML** untuk melacak Work Order (WS) dari awal pembuatan oleh Marketing hingga pengiriman ke customer oleh Accounting & Finance. Setiap divisi memiliki form input sendiri; semua data disimpan secara lokal (offline-first) dan di-sync ke Google Sheets sebagai backend cloud.
 
-### How to use on iOS (Safari)
-1. Open system in **Safari** (not Chrome/Firefox — iOS only allows camera via Safari)
-2. Navigate to any division (Engineering, PPIC, Production, QC, Accounting) or Track WS
-3. Tap the **📷** button in the scan bar
-4. Allow camera when prompted → **iOS: Settings → Safari → Camera → Allow**
-5. Point camera at QR Code on Work Order sheet
-6. Detected → fields flash purple → data auto-filled
-
-### How to use on Android (Chrome)
-1. Open system in **Chrome**
-2. Tap **📷** button
-3. If prompted: tap lock icon in address bar → Camera → Allow
-4. Point camera at QR Code
-5. Vibration + green flash → auto-filled
+**URL Produksi:** https://elim28-design.github.io/PT_KMIL_Barcodesys/
 
 ---
 
-## 🔌 Deploy to GitHub Pages
+## Fitur Utama
 
-The live site at `elim28-design.github.io/PT_KMIL_Barcodesys/` is running **V31**.  
-To deploy V33:
+### QR Code & Scanning
+- **Generate QR Code** otomatis dari NO_WS saat Marketing membuat order
+- **Scan via kamera HP** — autofill semua field form divisi yang relevan
+- **Physical scanner support** — input langsung dari barcode scanner USB/Bluetooth
+- **QR Finder** — cari dan print QR Code berdasarkan NO_WS di panel Marketing
 
-```bash
-# Option A: Replace as index.html
-cp V33_Industrial_Purple_kmil.html index.html
-git add index.html
-git commit -m "deploy: V33 — camera QR scan, auto-fill, iOS/Android fixes"
-git push origin main
+### Multi-Divisi Workflow
+| Divisi | Event Utama |
+|--------|-------------|
+| 📋 Marketing | Order Created, Drawing Tambahan, NO DRAWING |
+| ⚙️ Engineering | Drawing Released, Turun ke PPIC |
+| 📦 PPIC | BOM Released + List Raw Material |
+| 🏭 Production | OP Start (Single/Assembling), Serah Terima |
+| ✅ QC | Incoming Check, QC OK, Reject, Repair |
+| 🚚 Accounting & Finance | Delivered |
 
-# Option B: Deploy as versioned file
-git add V33_Industrial_Purple_kmil.html
-git commit -m "feat: V33 release"
-git push origin main
-# Then update GitHub Pages source in Settings
-```
+### Assembling Order Support
+- Marketing membuat parent WS (mis. `26030011`) + child WS (`26030011-01` s/d `26030011-05`)
+- QC scan parent sekali → sistem auto-generate dan save ke semua child WS secara **berurutan dan terkonfirmasi** (tidak ada double-entry)
+- PPIC auto-generate list material per child WS dari data Marketing
 
-> Camera requires **HTTPS** — GitHub Pages provides this automatically ✓
+### Offline-First
+- Data disimpan di `localStorage` secara **optimistik** (instan) sebelum dikirim ke Sheets
+- Semua divisi bisa bekerja tanpa internet; sync dilakukan saat koneksi tersedia
+- **Load from Sheets** — tombol manual untuk menarik data terbaru dari semua divisi
+
+### Track WS
+- Cari history WS by NO_WS, Customer, atau NO_PO
+- Buka tanpa query → tampil 60 WS terbaru
+- Timeline event lengkap per WS, dengan tombol **Print Log**
+- Navigasi dari Dashboard langsung ke Track WS dengan QR scan
+
+### Dashboard
+- Ringkasan status WS aktif per divisi
+- Klik card → langsung ke form divisi yang relevan
+- Real-time count WS per stage
 
 ---
 
-## 🐛 Bug Fixes (V32 → V33)
-
-| # | Bug | Fixed |
-|---|---|---|
-| 1 | `e.target.closest is not a function` crash (SVG/text nodes) | ✅ |
-| 2 | `_dept` race condition — autofill never fired on iOS camera | ✅ |
-| 3 | `100dvh` not supported on iOS < 15.4 | ✅ |
-| 4 | Missing `-webkit-backdrop-filter` on 5 modals | ✅ |
-| 5 | Input `font-size < 16px` → iOS auto-zoom on tap | ✅ |
-| 6 | `-webkit-appearance:none` broke native date pickers | ✅ |
-| 7 | No `visibilitychange` → camera drains battery on tab switch | ✅ |
-| 8 | Complex `getUserMedia` constraints crash on some devices | ✅ Tiered fallback |
-| 9 | No haptic/visual feedback when QR decoded | ✅ Vibrate + purple flash |
-| 10 | Physical scanner sends noise chars (`\x00`) in WS value | ✅ Stripped in parseQRData |
-
----
-
-## 🏗️ Architecture
+## Alur Kerja per Divisi
 
 ```
-V33_Industrial_Purple_kmil.html  (~570 KB, single file)
-│
-├── CSS (5 blocks)
-│   ├── Design System + Purple Palette
-│   ├── Components (topbar, sidebar, cards, forms)
-│   ├── T&C Screen + Police Line Warning
-│   ├── V33 Motion Engine (animations, sparks)
-│   └── Camera QR Scanner
-│
-└── JS (5 blocks)
-    ├── Splash + T&C Logic
-    ├── App Core (events, scan, save, sync)
-    ├── Animation Engine (particles, gear, piston)
-    ├── V33 Industrial Runtime (uptime, HUD, ripple)
-    └── Camera Engine (openCamScan, jsQR loop,
-                       parseQRData, flashAutofillFields,
-                       scannerBuffer, visibilitychange)
+Marketing → Engineering → PPIC → Production → QC → Accounting & Finance
+```
+
+### 1. Marketing (`User: Dicky S`)
+1. Isi Customer, NO_WS, NO_PO, Part Name, Deadline PO, Qty
+2. Pilih tipe: **Single Part** atau **Assembling** (isi WS Start & End Suffix)
+3. Upload Drawing (opsional)
+4. Klik **💾 Save Single Part** / **💾 Save Assembling**
+5. ⚠️ **WAJIB:** Print QR Code setelah save — tempel di benda kerja sebelum turun ke Engineering
+
+### 2. Engineering (`User: Andry / Fadhil / Pram / Heri`)
+1. Scan QR → data Marketing auto-fill
+2. Pilih event **Drawing Released**
+3. Pilih status turun ke PPIC (Semua / Parsial)
+4. Save to Sheets
+
+### 3. PPIC (`User: Kiki`)
+1. Scan QR → data auto-fill
+2. Isi Qty Total → event **BOM Released** → **💾 Save to Sheets** ← **WAJIB dilakukan lebih dulu**
+3. Setelah PPIC Info tersimpan → isi **List Raw Material** (nama, dimensi, qty, source)
+4. **💾 Simpan List Material** → toast notifikasi sukses muncul
+5. Material list otomatis tersync ke Produksi & QC
+
+### 4. Production (Operator)
+1. Scan QR → data + material list dari PPIC muncul
+2. Isi Serah Terima (NO_WS child, tanggal, qty, status)
+3. Pilih **OP Start** → Operator, Shift, Operation, Qty
+4. Save to Sheets
+
+### 5. QC (`User: Anton / Greg / Erik`)
+1. Login QC (ID + password)
+2. Scan QR parent WS
+3. Set Qty & status per material (OK / Repair / Reject)
+4. Pilih event → Remarks → Save
+5. **Assembling:** satu save = parent + semua child WS tersimpan berurutan
+
+### 6. Accounting & Finance (`User: Raynold / Veny / Lasma / Putri`)
+1. Scan QR → data customer & WS auto-fill
+2. Isi Qty Kirim, Upload SJ (opsional)
+3. Event **Delivered** → Save to Sheets
+
+---
+
+## Arsitektur Teknis
+
+### Single-File Structure
+```
+index.html
+├── <head>        — CSS (inline, ~1600 lines)
+├── <body>
+│   ├── Topbar    — Clock, Theme toggle, ⌨️ Shortcuts, 📖 SOP, ⚙️ Settings
+│   ├── Sidebar   — Navigation divisi + Tools
+│   ├── Views     — 17 view panels (dashboard, Marketing, Engineering, ...)
+│   ├── Modals    — cfgModal, howToUseModal, massModal, shortcutPanel
+│   └── <script>  — 5 inline JS blocks (~4000 lines total)
+│       ├── Block 1: Core logic (saveEvent, processScan, normalizeSheetRow, ...)
+│       ├── Block 2: Nemesis motion engine (IIFE, 'use strict')
+│       ├── Block 3: V32 animation engine (sparks, progress)
+│       ├── Block 4: Camera/QR scanner
+│       └── Block 5: Misc utils
+```
+
+### Data Flow
+```
+User Action
+    │
+    ▼
+getPayload(dept)        ← baca semua field form
+    │
+    ▼
+validatePayload(p)      ← validasi wajib
+    │
+    ▼
+saveEvs(rows)           ← OPTIMISTIC: simpan localStorage (instan)
+    │
+    ├─── [QC Assembling] ──→ _jsonpRaw() × (1 parent + N children)
+    │                         (sequential, confirmed, no doubles)
+    │
+    └─── [Other dept] ──────→ postToSheets(p) via fetch no-cors
+                               (background, non-blocking)
+```
+
+### LocalStorage Keys
+| Key | Isi |
+|-----|-----|
+| `kmil_v10_events` | Array semua events (semua divisi) |
+| `kmil_v2_config` | Config: `webAppUrl` GAS |
+| `kmil_v10_drawings` | Drawing thumbnails (base64) |
+| `kmil_v10_mats` | Material list per WS (PPIC) |
+| `kmil_v10_dt` | Downtime data |
+| `kmil_v10_sj` | Surat Jalan data |
+| `kmil_v10_st` | Serah Terima data |
+| `kmil_v11_stock` | Item stock data |
+
+### GAS Integration
+Sistem menggunakan **Google Apps Script (GAS)** sebagai backend via JSONP:
+
+```
+Browser → GET https://script.google.com/.../exec
+          ?action=jsonp
+          &subAction=appendEvent
+          &payload={"no_ws":"26030011","department":"Marketing",...}
+          &callback=kmilCb_1234567
+          ←
+          kmilCb_1234567({"ok":true})
+```
+
+**Write path (non-QC):** `fetch` dengan `mode: 'no-cors'` — cepat (~50ms), resolves segera  
+**Write path (QC Assembling):** `_jsonpRaw()` — menunggu callback GAS sebelum request berikutnya dikirim → **order terjamin, no duplicates**
+
+### Fungsi Kunci
+
+| Fungsi | Lokasi | Deskripsi |
+|--------|--------|-----------|
+| `saveEvent(dept)` | ~line 5051 | Simpan event: optimistic local → background GAS |
+| `processScan(dept)` | ~line 4683 | Handle QR scan → autofill form |
+| `normalizeSheetRow(r)` | ~line 4989 | Normalisasi field GAS (string/int, alias) |
+| `fetchFromSheets()` | ~line 4980 | JSONP read dari GAS, normalize |
+| `loadFromSheets()` | ~line 5037 | Manual sync: merge Sheets + local by `ts` |
+| `doTrack()` | ~line 5442 | Track WS: search + show-all |
+| `_renderTrackCards()` | ~line 5490 | Render card timeline WS |
+| `ppicMatGateUpdate()` | ~line 4500 | Show/hide PPIC material gate warning |
+| `addPpicMatRow()` | ~line 4243 | Gate-checked add material row |
+| `savePpicMat()` | ~line 4300 | Save material list + toast notifikasi |
+| `jumpToWs(ws)` | ~line 6850 | Dashboard → Track WS dengan WS tertentu |
+| `_jsonpRaw()` | ~line 4965 | True JSONP write (menunggu GAS response) |
+| `postToSheets(p)` | ~line 4976 | Wrapper: jsonpCall → GAS appendEvent |
+
+### Navigation Architecture
+`window.switchTool` di-wrap **3 kali**:
+1. `switchTool_orig` — navigasi dasar + Track WS init
+2. Nemesis wrapper — indikator animasi posisi
+3. V32 wrapper — spark effects
+
+`window.saveEvent` di-wrap **2 kali**:
+1. Progress tracker wrapper (show/hide progress bar)
+2. QC login check wrapper
+
+---
+
+## Setup & Konfigurasi
+
+### 1. Deploy
+File `index.html` adalah self-contained — tidak ada dependency eksternal selain font Google Fonts dan CDN icons. Cukup upload ke GitHub Pages atau hosting statis manapun.
+
+### 2. Google Apps Script
+Siapkan GAS script dengan endpoint `doGet(e)` yang mendukung:
+- `action=jsonp` + `subAction=appendEvent` — append satu row event ke Sheets
+- `action=jsonp` + `subAction=getEvents` — return semua events sebagai JSON
+- `action=jsonp` + `subAction=generateWsRange` — generate range WS Assembling
+
+Deploy sebagai **Web App** dengan akses: `Anyone, even anonymous`.
+
+### 3. Hubungkan ke Sheets
+1. Buka sistem di browser
+2. Klik ⚙️ (Settings) di kanan atas
+3. Paste URL Web App GAS ke field **Web App URL**
+4. Klik Save
+
+### 4. Sync Data Pertama
+- Klik ⚙️ → **☁️ Load from Sheets** untuk menarik semua data existing
+
+---
+
+## Struktur Data
+
+### Event Object
+```json
+{
+  "ts": "2026-04-25T08:30:00.000Z",
+  "department": "Marketing",
+  "event": "Order Created",
+  "no_ws": "26030011",
+  "customer": "AHM",
+  "no_po": "N309195",
+  "part": "Nama Part",
+  "qty": 5,
+  "deadline": "2026-05-31",
+  "ws_type": "ASSEMBLING",
+  "ws_start": "26030011-01",
+  "ws_end_suffix": 5,
+  "user": "Dicky S",
+  "remarks": "",
+  "drawing_ref": "",
+  "drawing_thumbnail": ""
+}
+```
+
+### Material Item (PPIC)
+```json
+{
+  "id": "m1714000000_ab12",
+  "name": "26030011-01",
+  "item_type": "ASSEMBLING",
+  "material": "S45C",
+  "len": "200", "wid": "50", "thk": "30", "dia": "",
+  "qty": 1,
+  "mat_source": "STOCK",
+  "harden": "YES",
+  "hrc": "58-62",
+  "notes": ""
+}
 ```
 
 ---
 
-## 📦 Dependencies
+## Changelog
 
-| Library | Version | CDN | Usage |
-|---|---|---|---|
-| jsQR | 1.4.0 | jsDelivr | Decode QR from camera frame |
-| qrcodejs | 1.0.0 | Cloudflare | Generate QR Code images |
-| Barlow Condensed | — | Google Fonts | Display font |
-| IBM Plex Mono | — | Google Fonts | Monospace / data |
+### V39 (Current)
+- ✅ **Police line warning** "JANGAN LUPA PRINT QR CODE" di bawah Save Single Part dan Save Assembling
+- ✅ **Tombol 📖 How to Use** di topbar — modal SOP flow chart per divisi
+- ✅ **Fix div imbalance** — closing `</div>` yang hilang dari `mkt-form-single` dan `mkt-form-assy` (menyebabkan Engineering, PPIC, Production, QC, Accounting, Tools tidak muncul)
+
+### V38
+- ✅ **QC Assembling — no doubles:** ganti `postToSheets` (fetch no-cors) dengan `_jsonpRaw` untuk sequential write; setiap write menunggu konfirmasi GAS sebelum request berikutnya → eliminasi duplicate rows di Sheets
+- ✅ **QC Assembling — true ordering:** parent → child-01 → child-02 → ... dijamin berurutan di Sheets
+- ✅ **PPIC success toast:** `savePpicMat()` menampilkan toast notifikasi hijau saat material berhasil disimpan
+- ✅ **PPIC info gate:** `addPpicMatRow()` dan `savePpicMat()` diblokir jika PPIC Info belum disave ke Sheets; warning banner `#ppic-mat-gate-warn` muncul otomatis
+
+### V37
+- ✅ Fix Track WS history kosong — type mismatch `no_ws` integer vs string dari Sheets
+- ✅ Fix printLog WS history tidak muncul
+- ✅ `normalizeSheetRow`: `.trim()` + `String()` pada semua ID field setelah aliasing
+- ✅ Card WS auto-expanded (`ws-card-body open`)
+
+### V36
+- ✅ `doTrack()` empty query → show 60 WS terbaru (tidak silent return)
+- ✅ `switchTool_orig` Track WS: reset mode + auto-call `doTrack()`
+- ✅ `clearTrack()` re-call `doTrack()` setelah clear
+- ✅ `_renderTrackCards()` sebagai shared helper
+
+### V35
+- ✅ Fix `jumpToWs()` — reset `trackMode='ws'` sebelum call `doTrack()` (bug: jika user sebelumnya di tab "BY CUSTOMER", track tidak muncul)
+
+### V34
+- ✅ T&C checkbox default `checked`; CSS light-mode override untuk T&C screen
+- ✅ `normalizeSheetRow()` — lowercase semua field GAS, mapping alias, stringify key fields
+- ✅ `fetchFromSheets()` limit 500 → 9999; normalize-before-filter
+- ✅ `saveEvent()` — optimistic local save (instant), GAS push background
+- ✅ Camera QR autofill timeout 260ms → 350ms; `trackMode` force `'ws'`
+
+### V33
+- ✅ Camera QR scanning via `getUserMedia`
+- ✅ Auto-fill form dari QR scan
+- ✅ Track WS dengan camera button
+
+---
+
+## Known Issues
+
+| Issue | Status | Keterangan |
+|-------|--------|------------|
+| `view-coo` div imbalance -3 | Pre-existing | Ada di file original sebelum V33; tidak mempengaruhi fungsi karena view-coo tidak digunakan aktif |
+| GAS slow response (>15s) | Edge case | `_jsonpRaw` timeout 15s; jika GAS lambat, QC assembling akan fallback ke `fetch no-cors` + 600ms delay |
+| iOS Safari fetch no-cors | Mitigated | Untuk QC assembling sudah pakai `_jsonpRaw`; divisi lain pakai fetch no-cors yang bisa gagal di iOS → fallback `_jsonpRaw` via `.catch()` |
 
 ---
 
-## 📱 Browser Support
-
-| Browser | Camera | Auto-fill | PWA |
-|---|---|---|---|
-| **Safari iOS ≥ 14.3** | ✅ | ✅ | ✅ A2HS |
-| **Chrome Android** | ✅ | ✅ | ✅ |
-| Chrome Desktop | ✅ | ✅ | ✅ |
-| Samsung Internet | ✅ | ✅ | ✅ |
-| Firefox | ⚠️ | ✅ | ❌ |
-
----
-
-## 🔄 Changelog
-
-### V33 — April 2026
-- ✅ Camera QR scan for **Track WS** (was missing)
-- ✅ Smart QR formula parser (7 formats + noise stripping)
-- ✅ Auto-fill visual flash on form fields
-- ✅ Scan result border glow on QR detect
-- ✅ Physical barcode scanner buffer (Zebra/Honeywell)
-- ✅ `_dept` race condition fixed (critical iOS bug)
-- ✅ `-webkit-appearance:none` excludes date/time pickers
-- ✅ Better iOS/Android permission error messages
-- ✅ `e.target.closest` crash fixed (SVG/text node events)
-
-### V32 — April 2026  
-- Purple Industrial Theme full migration
-- T&C Compliance Screen post-splash
-- Police Line Warnings (Production & PPIC)
-- Spark Particle System + Rotating Gear
-- iOS/Android bug fixes (18 total)
-- Camera QR Scanner (all 5 divisions)
-
-### V31 (Live)
-- QR Finder, COO Dashboard, Assembling WS
-- Serah Terima system, Material List BOM
-
----
+## File Info
 
 ```
-System Design & Development
-  Elim K — PT KMIL Digital Operations
-  2024–2026 · Bersatu Kita Hebat
+File    : index.html
+Lines   : ~8,257
+Size    : ~650 KB
+JS      : 5 inline script blocks, ~4,000 lines
+CSS     : ~1,600 lines inline
+Views   : 17 (dashboard + 6 divisi + 10 tools)
 ```
+
+---
+
+*PT KMIL Industrial Work Order System — maintained by internal IT*
