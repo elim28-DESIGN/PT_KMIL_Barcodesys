@@ -10,7 +10,7 @@
 <meta name="description" content="PT KMIL — Multi-Division Work Order System">
 <!-- Apple touch icon (inline SVG→PNG via canvas not needed, use emoji fallback) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307060f'/%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%236d28d9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='50' y='66' text-anchor='middle' font-size='44' font-family='Arial Black,Arial' font-weight='900' fill='white'%3EKM%3C/text%3E%3C/svg%3E">
-<title>PT KMIL — System V41</title>
+<title>PT KMIL — System V42</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script><style>
@@ -2057,7 +2057,7 @@ body::before{
 <div class="topbar">
 <div class="brand">
 <div class="brand-logo">KM</div>
-<div><div class="brand-name">PT KMIL System</div><div class="brand-ver">V33 · QR · Camera · Auto-fill</div></div>
+<div><div class="brand-name">PT KMIL System</div><div class="brand-ver">V42 · QR · Camera · Auto-fill</div></div>
 </div>
 <div style="display:flex;align-items:center;gap:8px">
 <div class="top-clock" id="liveClock">Sel, 21 Apr · 15.58.45</div>
@@ -2707,6 +2707,13 @@ body::before{
 <div style="display:flex;gap:6px;margin-bottom:8px">
 <input class="scan-input" id="qrfSearch" placeholder="Ketik NO_WS untuk cari..." oninput="renderQrFinderList()" style="border-color:var(--mkt);flex:1">
 <button class="btn btn-g" style="font-size:11px;padding:5px 9px" onclick="document.getElementById('qrfSearch').value='';renderQrFinderList()">✕</button>
+</div>
+<!-- Customer filter -->
+<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
+<span style="font-size:10px;font-family:var(--mono);color:var(--muted);white-space:nowrap">Customer:</span>
+<select id="qrfCustFilter" class="mat-sel" style="flex:1;font-size:12px" onchange="renderQrFinderList()">
+<option value="">— Semua Customer —</option>
+</select>
 </div>
 <!-- Filter tabs -->
 <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
@@ -5082,6 +5089,25 @@ function updateRoutingCount(){
   if(el) el.textContent=routingRows.length?routingRows.length+' step':'';
 }
 
+/* ── DURATION PARSER: handles "2 jam", "1.5h", "90 menit", "1 hari", "45", etc. ── */
+function parseRoutingDurToHours(dur){
+  if(!dur) return 0;
+  var s=String(dur).trim().toLowerCase();
+  /* "90 menit" / "90 min" */
+  var m=s.match(/(\d+(?:\.\d+)?)\s*(?:menit|min(?:utes?)?)/);
+  if(m) return Number(m[1])/60;
+  /* "1 hari" / "1 day" */
+  m=s.match(/(\d+(?:\.\d+)?)\s*(?:hari|day[s]?)/);
+  if(m) return Number(m[1])*8;
+  /* "2 jam" / "2 h" / "2 hours" / "2h" */
+  m=s.match(/(\d+(?:\.\d+)?)\s*(?:jam|hours?|h(?:rs?)?)\b/);
+  if(m) return Number(m[1]);
+  /* plain number — assume hours */
+  m=s.match(/^(\d+(?:\.\d+)?)$/);
+  if(m) return Number(m[1]);
+  return 0;
+}
+
 function renderRoutingTable(){
   const tb=$i('prd-routing-tbody');
   if(!tb) return;
@@ -5112,13 +5138,50 @@ function renderRoutingTable(){
   </select>
   ${!r.op?'<div style="font-size:10px;color:#ef4444;font-family:var(--mono);margin-top:2px">⚠ Wajib diisi</div>':''}
 </td>
-<td><input class="mat-inp" value="${r.dur||''}" placeholder="mis. 2 jam" style="font-size:13px;${!r.dur?'border-color:#ef4444;':''}" onchange="rrSet('${r.id}','dur',this.value)">${!r.dur?'<div style="font-size:10px;color:#ef4444;font-family:var(--mono);margin-top:2px">⚠ Wajib diisi</div>':''}</td>
+<td><input class="mat-inp" value="${r.dur||''}" placeholder="mis. 2 jam" style="font-size:13px;${!r.dur?'border-color:#ef4444;':''}" onchange="rrSet('${r.id}','dur',this.value);renderRoutingTotalRow()">${!r.dur?'<div style="font-size:10px;color:#ef4444;font-family:var(--mono);margin-top:2px">⚠ Wajib diisi</div>':''}</td>
 <td><select class="mat-sel" style="min-width:120px;font-size:13px;font-weight:700;color:${stColor};background:${stBg};border-color:${stColor}40" onchange="rrSet('${r.id}','status',this.value);renderRoutingTable()">
 ${stOptsFor(r.status)}
 </select></td>
 </tr>`;
   }).join('');
+
+  /* ── TOTAL ROW ── */
+  const totalHrs=routingRows.reduce((s,r)=>s+parseRoutingDurToHours(r.dur),0);
+  const totalOps=routingRows.filter(r=>r.op).length;
+  const totalDays=totalHrs/8;
+  const fmtDays=totalDays%1===0?totalDays.toFixed(0):totalDays.toFixed(1);
+  const fmtHrs=totalHrs%1===0?totalHrs.toFixed(0):totalHrs.toFixed(1);
+  const totalRow=document.createElement('tr');
+  totalRow.id='routing-total-row';
+  totalRow.style.cssText='background:color-mix(in srgb,var(--prd) 10%,var(--card));border-top:2px solid var(--prd);font-weight:700';
+  totalRow.innerHTML=`
+<td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--prd);letter-spacing:.5px;padding:6px 4px" colspan="1">∑</td>
+<td style="font-family:var(--mono);font-size:11px;color:var(--prd);padding:6px 8px" colspan="1"><span style="font-size:9px;color:var(--muted)">TOTAL</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${totalOps}</b> <span style="font-size:10px;color:var(--muted);font-weight:400">operation</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${fmtHrs} jam</b>${totalOps>0?`<span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:6px">≈ ${fmtDays} hari kerja</span>`:''}
+</td>
+<td style="padding:6px 8px;font-size:10px;color:var(--muted);font-family:var(--mono)">8 jam/hari</td>`;
+  tb.appendChild(totalRow);
+
   if(typeof updateRoutingGuidelineBar==='function') updateRoutingGuidelineBar();
+}
+
+function renderRoutingTotalRow(){
+  /* Lightweight: only re-render the total row without full table rebuild */
+  const totalHrs=routingRows.reduce((s,r)=>s+parseRoutingDurToHours(r.dur),0);
+  const totalOps=routingRows.filter(r=>r.op).length;
+  const totalDays=totalHrs/8;
+  const fmtDays=totalDays%1===0?totalDays.toFixed(0):totalDays.toFixed(1);
+  const fmtHrs=totalHrs%1===0?totalHrs.toFixed(0):totalHrs.toFixed(1);
+  const row=document.getElementById('routing-total-row');
+  if(!row) return;
+  row.innerHTML=`
+<td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--prd);letter-spacing:.5px;padding:6px 4px" colspan="1">∑</td>
+<td style="font-family:var(--mono);font-size:11px;color:var(--prd);padding:6px 8px" colspan="1"><span style="font-size:9px;color:var(--muted)">TOTAL</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${totalOps}</b> <span style="font-size:10px;color:var(--muted);font-weight:400">operation</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${fmtHrs} jam</b>${totalOps>0?`<span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:6px">≈ ${fmtDays} hari kerja</span>`:''}
+</td>
+<td style="padding:6px 8px;font-size:10px;color:var(--muted);font-family:var(--mono)">8 jam/hari</td>`;
 }
 
 function autoFillRoutingFromType(){
@@ -5651,22 +5714,75 @@ const div=$i('qrDiv');div.innerHTML='';
 try{new QRCode(div,{text:ws,width:130,height:130,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});$i('qrVal').textContent=ws;}
 catch(e){div.innerHTML='<div style="color:red;font-size:10px">QR Error</div>';}}
 function useWsStart(){const s=($i('wsStart')||{}).value?.trim();if(!s) return;if($i('noWs-assy'))$i('noWs-assy').value=s;if($i('noWs'))$i('noWs').value=s;renderQR();}
-function printQR(){const ws=$i('qrVal').textContent;const area=$i('qrDiv').innerHTML;
-const w=window.open('','_blank');
-w.document.write(`<html><head><title>QR ${ws}</title></head><body style="font-family:Arial;text-align:center;padding:30px"><div style="font-size:14px;font-weight:700;margin-bottom:10px">PT KMIL — Work Order QR</div>${area}<div style="font-family:monospace;font-weight:700;font-size:14px;margin-top:8px">${ws}</div>
+function printQR(){
+  const ws=$i('qrVal').textContent;
+  const area=$i('qrDiv').innerHTML;
+  /* Get marketing data for this WS */
+  const rows=evs().filter(r=>r.department==='Marketing'&&r.no_ws===ws);
+  const mkt=rows.length?rows[rows.length-1]:null;
+  const customer=mkt?.customer||'—';
+  const noPo=mkt?.no_po||'—';
+  const partName=mkt?.part||'—';
+  const deadline=mkt?.deadline||'';
+  const isExpiredDl=deadline&&(new Date()>new Date(deadline+' 23:59:59'));
+  const dlColor=isExpiredDl?'color:#cc0000;font-weight:700':'';
+  const dlText=deadline?(isExpiredDl?deadline+' ⚠ EXPIRED':deadline):'—';
+  /* WS type badge */
+  const wsType=mkt?.ws_type||'';
+  const isChildWsRx=/^.+-\d+$/.test(ws);
+  let badgeText='SINGLE PART';let badgeColor='#1d4ed8';
+  if(isChildWsRx){badgeText='CHILD WS';badgeColor='#7c3aed';}
+  else if(wsType==='ASSEMBLING'){badgeText='ASSEMBLING';badgeColor='#7c3aed';}
+  const w2=window.open('','_blank');
+  w2.document.write(`<html><head><title>QR ${ws}</title>
+<style>
+body{font-family:Arial,sans-serif;text-align:center;padding:28px 20px;background:#fff;color:#111}
+.header{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4b5563;margin-bottom:4px}
+.title{font-size:15px;font-weight:900;margin-bottom:10px;letter-spacing:.5px}
+.badge{display:inline-block;padding:3px 12px;border-radius:4px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#fff;background:${badgeColor};margin-bottom:10px}
+.ws-no{font-family:monospace;font-weight:800;font-size:18px;margin:8px 0 10px}
+table{width:100%;max-width:300px;margin:10px auto 0;border-collapse:collapse;font-size:12px;text-align:left}
+td{padding:5px 8px;border:1px solid #e0e0e0}
+td:first-child{font-weight:700;color:#555;white-space:nowrap;background:#f9f9f9;width:38%}
+@media print{body{padding:16px}}
+</style></head>
+<body>
+<div class="header">PT KMIL</div>
+<div class="title">WORK ORDER QR</div>
+<div class="badge">${badgeText}</div>
+${area}
+<div class="ws-no">${ws}</div>
+<table>
+<tr><td>Customer</td><td><b>${customer}</b></td></tr>
+<tr><td>NO_PO</td><td>${noPo}</td></tr>
+<tr><td>Part Name</td><td>${partName}</td></tr>
+<tr><td>Deadline PO</td><td style="${dlColor}">${dlText}</td></tr>
+</table>
 </body></html>`);
-w.document.close();w.focus();w.print();}
+  w2.document.close();w2.focus();w2.print();
+}
 let _qrfTab='all';
 let _qrfSelectedWs=null;
+function populateQrfCustomerFilter(){
+  const sel=document.getElementById('qrfCustFilter');
+  if(!sel) return;
+  const items=getMktWsList();
+  const custs=[...new Set(items.map(i=>i.customer).filter(Boolean))].sort();
+  const prev=sel.value;
+  sel.innerHTML='<option value="">— Semua Customer —</option>';
+  custs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  if(prev&&custs.includes(prev)) sel.value=prev;
+}
 function setQrfTab(tab,el){_qrfTab=tab;
 document.querySelectorAll('#mkt-qr-finder .btn').forEach(b=>{if(b.id&&b.id.startsWith('qrf-tab')){b.style.borderColor='';b.style.color='';
 }});
 if(el){el.style.borderColor='var(--mkt)';el.style.color='var(--mkt)';}
+populateQrfCustomerFilter();
 renderQrFinderList();}
 function getMktWsList(){const rows=evs().filter(r=>r.department==='Marketing');
 const map={};
 rows.forEach(r=>{
-if(r.no_ws) map[r.no_ws]={ws:r.no_ws,customer:r.customer||'',part:r.part_name||r.part||'',ws_type:r.ws_type||'',ts:r.ts||''};
+if(r.no_ws) map[r.no_ws]={ws:r.no_ws,customer:r.customer||'',part:r.part_name||r.part||'',ws_type:r.ws_type||'',ts:r.ts||'',no_po:r.no_po||'',deadline:r.deadline||''};
 });
 return Object.values(map);}
 function getChildWsList(parentWs){const rows=evs().filter(r=>r.department==='Marketing'&&r.no_ws===parentWs);
@@ -5682,17 +5798,20 @@ return list;}
 function renderQrFinderList(){const list=document.getElementById('qrfList');
 const countEl=document.getElementById('qrfCount');
 if(!list) return;
+populateQrfCustomerFilter();
 const q=(document.getElementById('qrfSearch')?.value||'').trim().toLowerCase();
+const custFilter=(document.getElementById('qrfCustFilter')?.value||'').trim().toLowerCase();
 let items=getMktWsList();
 if(_qrfTab==='single') items=items.filter(i=>i.ws_type==='SINGLE_PART'||!i.ws_type.includes('ASSEMBLING'));
 if(_qrfTab==='assy')   items=items.filter(i=>i.ws_type==='ASSEMBLING');
+if(custFilter) items=items.filter(i=>(i.customer||'').toLowerCase()===custFilter);
 if(q){items=items.filter(i=>{if(i.ws.toLowerCase().includes(q)||i.customer.toLowerCase().includes(q)||i.part.toLowerCase().includes(q)) return true;
 if(i.ws_type==='ASSEMBLING'){const children=getChildWsList(i.ws);
 if(children.some(ch=>ch.toLowerCase().includes(q))) return true;}
 return false;});}
 items.sort((a,b)=>a.ws.localeCompare(b.ws));
 if(countEl) countEl.textContent=items.length+' WS ditemukan';
-if(!items.length){list.innerHTML='<div class="qrf-empty">Tidak ada WS'+(q?' yang cocok.':' tersimpan dari Marketing.')+'</div>';
+if(!items.length){list.innerHTML='<div class="qrf-empty">Tidak ada WS'+(q||custFilter?' yang cocok.':' tersimpan dari Marketing.')+'</div>';
 return;}
 let html='';
 items.forEach(item=>{const isAssy=item.ws_type==='ASSEMBLING';
@@ -5728,73 +5847,128 @@ if(wsEl) wsEl.textContent=ws;
 if(metaEl) metaEl.textContent=(customer?customer:'')+(part?' · '+part:'');
 if(printBtn){printBtn.disabled=false;}
 if(hintEl) hintEl.textContent='Siap print · '+ws;}
+function _buildQrPrintHTML(ws, area, mktData, isChild){
+  /* mktData = marketing event row (or null). isChild = boolean */
+  const customer=(mktData?.customer)||'—';
+  const noPo=(mktData?.no_po)||'—';
+  const partName=(mktData?.part)||'—';
+  const deadline=(mktData?.deadline)||'';
+  const isExpiredDl=deadline&&(new Date()>new Date(deadline+' 23:59:59'));
+  const dlColor=isExpiredDl?'color:#cc0000;font-weight:700':'';
+  const dlText=deadline?(isExpiredDl?deadline+' ⚠ EXPIRED':deadline):'—';
+  const wsType=(mktData?.ws_type)||'';
+  let badgeText='SINGLE PART';let badgeColor='#1d4ed8';
+  if(isChild){badgeText='CHILD WS';badgeColor='#7c3aed';}
+  else if(wsType==='ASSEMBLING'){badgeText='ASSEMBLING';badgeColor='#7c3aed';}
+  return `<div style="font-family:Arial,sans-serif;text-align:center;padding:22px 16px;color:#111">
+<div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#4b5563;margin-bottom:3px">PT KMIL</div>
+<div style="font-size:14px;font-weight:900;margin-bottom:8px;letter-spacing:.5px">WORK ORDER QR</div>
+<div style="display:inline-block;padding:3px 12px;border-radius:4px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#fff;background:${badgeColor};margin-bottom:9px">${badgeText}</div>
+${area}
+<div style="font-family:monospace;font-weight:800;font-size:17px;margin:7px 0 9px">${ws}</div>
+<table style="width:100%;max-width:290px;margin:0 auto;border-collapse:collapse;font-size:11px;text-align:left">
+<tr><td style="padding:4px 7px;border:1px solid #e0e0e0;font-weight:700;color:#555;background:#f9f9f9;white-space:nowrap;width:38%">Customer</td><td style="padding:4px 7px;border:1px solid #e0e0e0"><b>${customer}</b></td></tr>
+<tr><td style="padding:4px 7px;border:1px solid #e0e0e0;font-weight:700;color:#555;background:#f9f9f9">NO_PO</td><td style="padding:4px 7px;border:1px solid #e0e0e0">${noPo}</td></tr>
+<tr><td style="padding:4px 7px;border:1px solid #e0e0e0;font-weight:700;color:#555;background:#f9f9f9">Part Name</td><td style="padding:4px 7px;border:1px solid #e0e0e0">${partName}</td></tr>
+<tr><td style="padding:4px 7px;border:1px solid #e0e0e0;font-weight:700;color:#555;background:#f9f9f9">Deadline PO</td><td style="padding:4px 7px;border:1px solid #e0e0e0;${dlColor}">${dlText}</td></tr>
+</table></div>`;
+}
+
 function printQrFinder(){if(!_qrfSelectedWs) return;
 const area=document.getElementById('qrfQrDiv').innerHTML;
 const ws=_qrfSelectedWs;
-const meta=document.getElementById('qrfQrMeta')?.textContent||'';
-// Build child WS info if this is an assembling parent
-const children=getChildWsList(ws);
-let childInfoHTML='';
-if(children.length){
-const rows=evs().filter(r=>r.department==='Marketing'&&r.no_ws===ws);
-const mkt=rows.length?rows[rows.length-1]:null;
-childInfoHTML=`<div style="margin-top:12px;text-align:left;max-width:300px;margin-left:auto;margin-right:auto">
-<div style="font-size:11px;font-weight:700;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:6px">Child WS (${children.length} items):</div>
-<table style="width:100%;border-collapse:collapse;font-size:10px">
-<tr style="background:#f0f0f0"><th style="padding:3px 6px;border:1px solid #ddd;text-align:left">NO_WS Child</th><th style="padding:3px 6px;border:1px solid #ddd;text-align:center">Qty</th></tr>
-${children.map(ch=>{const qty=typeof mktAssyQtyData!=='undefined'&&mktAssyQtyData[ch]?mktAssyQtyData[ch]:(mkt&&mkt.qty_plan?Math.ceil(mkt.qty_plan/children.length):1);return '<tr><td style="padding:3px 6px;border:1px solid #ddd;font-family:monospace;font-weight:700">'+ch+'</td><td style="padding:3px 6px;border:1px solid #ddd;text-align:center">'+qty+'</td></tr>';}).join('')}
-</table></div>`;
-}
+// Find marketing data — handle child WS (e.g. 26020036-01)
+const isChildWs=/^.+-\d+$/.test(ws);
+const parentWs=isChildWs?ws.replace(/-\d+$/,''):ws;
+const mktRows=evs().filter(r=>r.department==='Marketing'&&r.no_ws===parentWs);
+const mkt=mktRows.length?mktRows[mktRows.length-1]:null;
+const children=getChildWsList(parentWs);
 const w=window.open('','_blank');
-w.document.write(`<html><head><title>QR ${ws}</title></head><body style="font-family:Arial;text-align:center;padding:30px">
-<div style="font-size:13px;font-weight:700;margin-bottom:6px">PT KMIL — Work Order QR</div>
-${area}
-<div style="font-family:monospace;font-weight:700;font-size:15px;margin-top:8px">${ws}</div>
-<div style="font-size:11px;color:#666;margin-top:3px">${meta}</div>
-${childInfoHTML}
-</body></html>`);
+w.document.write(`<html><head><title>QR ${ws}</title>
+<style>body{margin:0;background:#fff}@media print{body{padding:0}}</style>
+</head><body>${_buildQrPrintHTML(ws,area,mkt,isChildWs)}</body></html>`);
 w.document.close();w.focus();w.print();}
 function printAllQrFinder(){let items=getMktWsList();
 const q=(document.getElementById('qrfSearch')?.value||'').trim().toLowerCase();
+const custFilter=(document.getElementById('qrfCustFilter')?.value||'').trim().toLowerCase();
 if(_qrfTab==='single') items=items.filter(i=>i.ws_type==='SINGLE_PART'||!i.ws_type.includes('ASSEMBLING'));
 if(_qrfTab==='assy')   items=items.filter(i=>i.ws_type==='ASSEMBLING');
 if(q) items=items.filter(i=>i.ws.toLowerCase().includes(q)||i.customer.toLowerCase().includes(q));
+if(custFilter) items=items.filter(i=>(i.customer||'').toLowerCase().includes(custFilter));
 if(!items.length){showToast('Tidak ada WS untuk diprint.','warn');return;}
+/* Expand assembling to include children */
 const expanded=[];
-items.forEach(item=>{expanded.push(item);
-if(item.ws_type==='ASSEMBLING'){const children=getChildWsList(item.ws);
-children.forEach(ch=>expanded.push({ws:ch,customer:item.customer,part:item.part,ws_type:'CHILD'}));}});
-items=expanded;
-if(!items.length){showToast('Tidak ada WS untuk diprint.','warn');return;}
+items.forEach(item=>{
+  expanded.push({...item,isChild:false});
+  if(item.ws_type==='ASSEMBLING'){const children=getChildWsList(item.ws);
+  children.forEach(ch=>expanded.push({ws:ch,customer:item.customer,part:item.part,ws_type:'CHILD',no_po:item.no_po,deadline:item.deadline,isChild:true}));}
+});
+if(!expanded.length){showToast('Tidak ada WS untuk diprint.','warn');return;}
+/* Build items data with mkt info */
+const allEvs=evs();
+const itemsData=expanded.map(item=>{
+  const isChild=item.isChild||/^.+-\d+$/.test(item.ws);
+  const parentWs=isChild?item.ws.replace(/-\d+$/,''):item.ws;
+  const mktRows=allEvs.filter(r=>r.department==='Marketing'&&r.no_ws===parentWs);
+  const mkt=mktRows.length?mktRows[mktRows.length-1]:null;
+  const wsType=item.ws_type==='CHILD'?'CHILD':(mkt?.ws_type||'SINGLE_PART');
+  let badgeText='SINGLE PART';let badgeColor='#1d4ed8';
+  if(item.isChild){badgeText='CHILD WS';badgeColor='#7c3aed';}
+  else if(wsType==='ASSEMBLING'){badgeText='ASSEMBLING';badgeColor='#7c3aed';}
+  const customer=(mkt?.customer)||item.customer||'—';
+  const noPo=(mkt?.no_po)||item.no_po||'—';
+  const partName=(mkt?.part)||item.part||'—';
+  const deadline=(mkt?.deadline)||item.deadline||'';
+  const isExp=deadline&&(new Date()>new Date(deadline+' 23:59:59'));
+  return {ws:item.ws,customer,noPo,partName,deadline,isExp,badgeText,badgeColor};
+});
+const itemsJson=JSON.stringify(itemsData);
 const w=window.open('','_blank');
-const itemsJson=JSON.stringify(items.map(i=>({ws:i.ws,meta:(i.customer||'')+(i.part?' · '+i.part:'')})));
 w.document.write(`<html><head><title>QR All — PT KMIL</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-<style>body{font-family:Arial;padding:20px;background:#fff}
-.grid{display:flex;flex-wrap:wrap;gap:16px}
-.card{text-align:center;padding:12px 10px;border:1px solid #e2e8f0;border-radius:8px;width:150px;break-inside:avoid}
-.ws{font-family:monospace;font-weight:700;font-size:12px;margin-top:6px;word-break:break-all}
-.meta{font-size:10px;color:#666;margin-top:2px}
-h2{font-size:14px;margin-bottom:14px}
-@media print{body{padding:8px}h2{margin-bottom:10px}}
+<style>
+body{font-family:Arial,sans-serif;padding:16px;background:#fff}
+.grid{display:flex;flex-wrap:wrap;gap:14px}
+.card{text-align:center;padding:12px 10px;border:1px solid #d0d0d0;border-radius:8px;width:165px;break-inside:avoid;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card-header{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#6b7280;margin-bottom:2px}
+.badge{display:inline-block;padding:2px 9px;border-radius:3px;font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff;margin-bottom:7px}
+.ws{font-family:monospace;font-weight:800;font-size:12px;margin:6px 0 8px;word-break:break-all}
+table{width:100%;border-collapse:collapse;font-size:9px;text-align:left;margin-top:5px}
+td{padding:3px 5px;border:1px solid #e8e8e8}
+td:first-child{font-weight:700;color:#555;background:#f9f9f9;white-space:nowrap}
+.exp{color:#cc0000;font-weight:700}
+h2{font-size:13px;margin-bottom:12px}
+@media print{body{padding:6px}h2{margin-bottom:8px}}
 </style></head>
 <body>
-<h2>PT KMIL — QR Code WS Marketing (${items.length} items)</h2>
+<h2>PT KMIL — QR Code WS Marketing (${expanded.length} items)</h2>
 <div class="grid" id="qrGrid"></div>
 <script>
 const items=${itemsJson};
 const grid=document.getElementById('qrGrid');
-items.forEach(item=>{const card=document.createElement('div');card.className='card';
-const qd=document.createElement('div');qd.id='qr_'+item.ws.replace(/[^a-z0-9]/gi,'_');
-card.appendChild(qd);
-const wsEl=document.createElement('div');wsEl.className='ws';wsEl.textContent=item.ws;
-card.appendChild(wsEl);
-const metaEl=document.createElement('div');metaEl.className='meta';metaEl.textContent=item.meta;
-card.appendChild(metaEl);
-grid.appendChild(card);
-try{new QRCode(qd,{text:item.ws,width:110,height:110,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});}catch(e){}
+items.forEach(item=>{
+  const card=document.createElement('div');card.className='card';
+  const hdr=document.createElement('div');hdr.className='card-header';hdr.textContent='PT KMIL · WORK ORDER QR';
+  card.appendChild(hdr);
+  const badge=document.createElement('div');badge.className='badge';
+  badge.style.background=item.badgeColor;badge.textContent=item.badgeText;
+  card.appendChild(badge);
+  const qd=document.createElement('div');qd.id='qr_'+item.ws.replace(/[^a-z0-9]/gi,'_');
+  card.appendChild(qd);
+  const wsEl=document.createElement('div');wsEl.className='ws';wsEl.textContent=item.ws;
+  card.appendChild(wsEl);
+  const tbl=document.createElement('table');
+  const dlStyle=item.isExp?'class="exp"':'';
+  const dlText=item.deadline?(item.isExp?item.deadline+' ⚠':item.deadline):'—';
+  tbl.innerHTML='<tr><td>Customer</td><td><b>'+item.customer+'</b></td></tr>'
+    +'<tr><td>NO_PO</td><td>'+item.noPo+'</td></tr>'
+    +'<tr><td>Part</td><td>'+item.partName+'</td></tr>'
+    +'<tr><td>Deadline</td><td '+dlStyle+'>'+dlText+'</td></tr>';
+  card.appendChild(tbl);
+  grid.appendChild(card);
+  try{new QRCode(qd,{text:item.ws,width:110,height:110,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});}catch(e){}
 });
-setTimeout(()=>{window.focus();window.print();},600);
+setTimeout(()=>{window.focus();window.print();},700);
 <\/script></body></html>`);
 w.document.close();}
 function printLogPerChild(ws){
