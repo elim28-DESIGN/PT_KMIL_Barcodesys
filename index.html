@@ -5273,25 +5273,30 @@ async function saveRoutingToSheets(){
     return;
   }
 
-  /* Push each row to Sheets */
-  let ok=0;
+  /* Push each row to Sheets via jsonpCall (same mechanism as appendEvent) */
+  let ok=0,fail=0;
   for(let i=0;i<rows.length;i++){
     try{
-      const url=new URL(gasUrl);
-      url.searchParams.set('subAction','appendRouting');
-      url.searchParams.set('payload',JSON.stringify(rows[i]));
-      await fetch(url.toString(),{method:'GET',mode:'no-cors'});
+      await jsonpCall(gasUrl,{subAction:'appendRouting',payload:JSON.stringify(rows[i])});
       ok++;
-    }catch(e){}
-    if(i<rows.length-1) await new Promise(r=>setTimeout(r,180));
+    }catch(e){
+      fail++;
+      console.warn('[Routing] Row',i+1,'gagal:',e.message);
+    }
+    if(i<rows.length-1) await new Promise(r=>setTimeout(r,200));
   }
 
   /* Mark saved in localStorage */
-  st[noWs].saved_to_sheets=true;
+  st[noWs].saved_to_sheets=(fail===0);
   saveRoutingSt(st);
 
-  if(m){m.textContent=`✓ Routing ${noWs} tersimpan! ${rows.length} step → Sheet "RoutingProcess"`;m.className='smsg ok';}
-  if(typeof showToast==='function') showToast(`✓ Routing ${noWs} → Sheets (${rows.length} step)`,'ok');
+  if(fail>0&&ok===0){
+    if(m){m.textContent='⚠️ Routing gagal dikirim ke Sheets. Cek GAS URL di ⚙️ Settings.';m.className='smsg err';}
+    if(typeof showToast==='function') showToast('⚠️ Routing gagal ke Sheets','err');
+    return;
+  }
+  if(m){m.textContent=`✓ Routing ${noWs} tersimpan! ${ok}/${rows.length} step → Sheet "RoutingProcess"${fail>0?' ('+fail+' gagal)':''}`;m.className=fail>0?'smsg warn':'smsg ok';}
+  if(typeof showToast==='function') showToast(`✓ Routing ${noWs} → Sheets (${ok} step)`,'ok');
   const savedBadge=$i('prd-routing-sync-saved-badge');if(savedBadge) savedBadge.style.display='inline';
   updateRoutingGuidelineBar();
   renderPrdEventsLog(noWs);
@@ -5411,7 +5416,7 @@ if(sel){sel.style.borderColor=v==='FINISH_PROCESS'?'#10b981':'';sel.style.color=
 }
 function toggleParsial(){$i('parsialRow').classList.toggle('vis',$i('acc-parsial').value==='YES');}
 function jsonpCall(baseUrl,params){const subAction=params.subAction||'';
-const isWrite=(subAction==='appendEvent'||subAction==='generateWsRange');
+const isWrite=(subAction==='appendEvent'||subAction==='generateWsRange'||subAction==='appendRouting');
 if(isWrite){return new Promise((res,rej)=>{const url=new URL(baseUrl);
 url.searchParams.set('action','jsonp');
 Object.keys(params).forEach(k=>url.searchParams.set(k,params[k]));
