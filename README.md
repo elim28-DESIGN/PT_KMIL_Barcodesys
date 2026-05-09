@@ -1,347 +1,165 @@
-# PT KMIL System — V39
+# PT KMIL — ERP Barcode System V44
 
-> **Single-file industrial Work Order tracking system** with QR code scanning, Google Sheets sync, multi-division workflow, and offline-first architecture.
-
-[![Version](https://img.shields.io/badge/version-V39-purple)](https://elim28-design.github.io/PT_KMIL_Barcodesys/)
-[![Type](https://img.shields.io/badge/type-Single%20HTML%20File-blue)](#)
-[![Storage](https://img.shields.io/badge/storage-LocalStorage%20%2B%20Google%20Sheets-green)](#)
+> Industrial-grade, single-file web ERP for shop-floor tracking.  
+> Runs entirely in the browser — no server required. Google Sheets as the backend.
 
 ---
 
-## Daftar Isi
+## Stack
 
-- [Overview](#overview)
-- [Fitur Utama](#fitur-utama)
-- [Alur Kerja per Divisi](#alur-kerja-per-divisi)
-- [Arsitektur Teknis](#arsitektur-teknis)
-- [Setup & Konfigurasi](#setup--konfigurasi)
-- [Struktur Data](#struktur-data)
-- [Changelog](#changelog)
-- [Known Issues](#known-issues)
-
----
-
-## Overview
-
-PT KMIL System adalah aplikasi berbasis browser **satu file HTML** untuk melacak Work Order (WS) dari awal pembuatan oleh Marketing hingga pengiriman ke customer oleh Accounting & Finance. Setiap divisi memiliki form input sendiri; semua data disimpan secara lokal (offline-first) dan di-sync ke Google Sheets sebagai backend cloud.
-
-**URL Produksi:** https://elim28-design.github.io/PT_KMIL_Barcodesys/
+| Layer | Technology |
+|---|---|
+| Frontend | Vanilla HTML/CSS/JS — single file, zero build step |
+| Font | Inter (UI) + JetBrains Mono (codes, timestamps) |
+| Backend | Google Apps Script (GAS) — deployed as Web App |
+| Storage | Google Sheets + `localStorage` (offline cache) |
+| QR Scan | jsQR (camera) + barcode scanner (USB/BT) |
 
 ---
 
-## Fitur Utama
+## Features
 
-### QR Code & Scanning
-- **Generate QR Code** otomatis dari NO_WS saat Marketing membuat order
-- **Scan via kamera HP** — autofill semua field form divisi yang relevan
-- **Physical scanner support** — input langsung dari barcode scanner USB/Bluetooth
-- **QR Finder** — cari dan print QR Code berdasarkan NO_WS di panel Marketing
+### Divisions & Flow
+All work orders follow a strict sequential flow:
 
-### Multi-Divisi Workflow
-| Divisi | Event Utama |
-|--------|-------------|
-| 📋 Marketing | Order Created, Drawing Tambahan, NO DRAWING |
-| ⚙️ Engineering | Drawing Released, Turun ke PPIC |
-| 📦 PPIC | BOM Released + List Raw Material |
-| 🏭 Production | OP Start (Single/Assembling), Serah Terima |
-| ✅ QC | Incoming Check, QC OK, Reject, Repair |
-| 🚚 Accounting & Finance | Delivered |
+```
+Marketing → Engineering → PPIC → Production → QC → Accounting
+```
 
-### Assembling Order Support
-- Marketing membuat parent WS (mis. `26030011`) + child WS (`26030011-01` s/d `26030011-05`)
-- QC scan parent sekali → sistem auto-generate dan save ke semua child WS secara **berurutan dan terkonfirmasi** (tidak ada double-entry)
-- PPIC auto-generate list material per child WS dari data Marketing
+Each division can only fill their form after the previous division has an event saved. Validation is real-time against Google Sheets.
 
-### Offline-First
-- Data disimpan di `localStorage` secara **optimistik** (instan) sebelum dikirim ke Sheets
-- Semua divisi bisa bekerja tanpa internet; sync dilakukan saat koneksi tersedia
-- **Load from Sheets** — tombol manual untuk menarik data terbaru dari semua divisi
+| Division | Key Capabilities |
+|---|---|
+| **Marketing** | Create WS (Single Part / Assembling range), upload drawing, set deadline |
+| **Engineering** | Drawing release, NC report, auto-sync child WS from Marketing |
+| **PPIC** | Material planning, BOM entry, auto-generate from Marketing data |
+| **Production** | OP events, routing process table, assembly parts, material check |
+| **QC** | Bulk inspection per material, pass/fail/rework per item, SJ upload |
+| **Accounting** | Final save, SJ confirmation, delivery tracking |
 
-### Track WS
-- Cari history WS by NO_WS, Customer, atau NO_PO
-- Buka tanpa query → tampil 60 WS terbaru
-- Timeline event lengkap per WS, dengan tombol **Print Log**
-- Navigasi dari Dashboard langsung ke Track WS dengan QR scan
-
-### Dashboard
-- Ringkasan status WS aktif per divisi
-- Klik card → langsung ke form divisi yang relevan
-- Real-time count WS per stage
+### Other Features
+- **Catalog / Vault** — searchable archive of all WS events from Sheets
+- **Dashboard** — live status per WS across all divisions
+- **Stock Tracker** — simple in/out per material
+- **DT (Downtime) Tracker** — machine-level downtime logging
+- **Camera QR Scanner** — works on iOS/Android without native app
+- **Offline-first** — all data saved to `localStorage`, sync to Sheets on demand
+- **Light/Dark mode** — system preference, T&C always light
+- **Responsive** — mobile-friendly with bottom nav
 
 ---
 
-## Alur Kerja per Divisi
+## Setup
 
-```
-Marketing → Engineering → PPIC → Production → QC → Accounting & Finance
-```
+### 1. Google Apps Script
 
-### 1. Marketing (`User: Dicky S`)
-1. Isi Customer, NO_WS, NO_PO, Part Name, Deadline PO, Qty
-2. Pilih tipe: **Single Part** atau **Assembling** (isi WS Start & End Suffix)
-3. Upload Drawing (opsional)
-4. Klik **💾 Save Single Part** / **💾 Save Assembling**
-5. ⚠️ **WAJIB:** Print QR Code setelah save — tempel di benda kerja sebelum turun ke Engineering
+1. Go to [script.google.com](https://script.google.com) → New project
+2. Paste the entire contents of `Code.gs` (V44)
+3. Set your Spreadsheet ID:
+   ```js
+   var SPREADSHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms';
+   ```
+4. Run `setupSheets()` once from the editor to create sheet tabs
+5. **Deploy → New deployment → Web App**
+   - Execute as: **Me**
+   - Who has access: **Anyone**
+6. Copy the deployment URL
 
-### 2. Engineering (`User: Andry / Fadhil / Pram / Heri`)
-1. Scan QR → data Marketing auto-fill
-2. Pilih event **Drawing Released**
-3. Pilih status turun ke PPIC (Semua / Parsial)
-4. Save to Sheets
+### 2. Website Settings
 
-### 3. PPIC (`User: Kiki`)
-1. Scan QR → data auto-fill
-2. Isi Qty Total → event **BOM Released** → **💾 Save to Sheets** ← **WAJIB dilakukan lebih dulu**
-3. Setelah PPIC Info tersimpan → isi **List Raw Material** (nama, dimensi, qty, source)
-4. **💾 Simpan List Material** → toast notifikasi sukses muncul
-5. Material list otomatis tersync ke Produksi & QC
+1. Open `index.html` in a browser
+2. Click **⚙️ Settings** (top-right)
+3. Paste the GAS URL into **Google Apps Script URL**
+4. The **GAS URL Routing** field can use the same URL
+5. Click Save
 
-### 4. Production (Operator)
-1. Scan QR → data + material list dari PPIC muncul
-2. Isi Serah Terima (NO_WS child, tanggal, qty, status)
-3. Pilih **OP Start** → Operator, Shift, Operation, Qty
-4. Save to Sheets
+### 3. Sheet Structure
 
-### 5. QC (`User: Anton / Greg / Erik`)
-1. Login QC (ID + password)
-2. Scan QR parent WS
-3. Set Qty & status per material (OK / Repair / Reject)
-4. Pilih event → Remarks → Save
-5. **Assembling:** satu save = parent + semua child WS tersimpan berurutan
+Two sheets are auto-created by `setupSheets()`:
 
-### 6. Accounting & Finance (`User: Raynold / Veny / Lasma / Putri`)
-1. Scan QR → data customer & WS auto-fill
-2. Isi Qty Kirim, Upload SJ (opsional)
-3. Event **Delivered** → Save to Sheets
+**`Events`** — all division events
 
----
+| Column | Description |
+|---|---|
+| `ts` | ISO timestamp |
+| `department` | Marketing / Engineering / PPIC / Production / QC / Accounting |
+| `event` | Event name (WS Created, Drawing Released, etc.) |
+| `no_ws` | Work order number |
+| `customer`, `part`, `operation` | WO details |
+| `status` | CREATED / IN PROGRESS / DONE / etc. |
+| ... | See `HEADERS_EVENTS` in Code.gs for full list |
 
-## Arsitektur Teknis
+**`RoutingProcess`** — production routing steps
 
-### Single-File Structure
-```
-index.html
-├── <head>        — CSS (inline, ~1600 lines)
-├── <body>
-│   ├── Topbar    — Clock, Theme toggle, ⌨️ Shortcuts, 📖 SOP, ⚙️ Settings
-│   ├── Sidebar   — Navigation divisi + Tools
-│   ├── Views     — 17 view panels (dashboard, Marketing, Engineering, ...)
-│   ├── Modals    — cfgModal, howToUseModal, massModal, shortcutPanel
-│   └── <script>  — 5 inline JS blocks (~4000 lines total)
-│       ├── Block 1: Core logic (saveEvent, processScan, normalizeSheetRow, ...)
-│       ├── Block 2: Nemesis motion engine (IIFE, 'use strict')
-│       ├── Block 3: V32 animation engine (sparks, progress)
-│       ├── Block 4: Camera/QR scanner
-│       └── Block 5: Misc utils
-```
-
-### Data Flow
-```
-User Action
-    │
-    ▼
-getPayload(dept)        ← baca semua field form
-    │
-    ▼
-validatePayload(p)      ← validasi wajib
-    │
-    ▼
-saveEvs(rows)           ← OPTIMISTIC: simpan localStorage (instan)
-    │
-    ├─── [QC Assembling] ──→ _jsonpRaw() × (1 parent + N children)
-    │                         (sequential, confirmed, no doubles)
-    │
-    └─── [Other dept] ──────→ postToSheets(p) via fetch no-cors
-                               (background, non-blocking)
-```
-
-### LocalStorage Keys
-| Key | Isi |
-|-----|-----|
-| `kmil_v10_events` | Array semua events (semua divisi) |
-| `kmil_v2_config` | Config: `webAppUrl` GAS |
-| `kmil_v10_drawings` | Drawing thumbnails (base64) |
-| `kmil_v10_mats` | Material list per WS (PPIC) |
-| `kmil_v10_dt` | Downtime data |
-| `kmil_v10_sj` | Surat Jalan data |
-| `kmil_v10_st` | Serah Terima data |
-| `kmil_v11_stock` | Item stock data |
-
-### GAS Integration
-Sistem menggunakan **Google Apps Script (GAS)** sebagai backend via JSONP:
-
-```
-Browser → GET https://script.google.com/.../exec
-          ?action=jsonp
-          &subAction=appendEvent
-          &payload={"no_ws":"26030011","department":"Marketing",...}
-          &callback=kmilCb_1234567
-          ←
-          kmilCb_1234567({"ok":true})
-```
-
-**Write path (non-QC):** `fetch` dengan `mode: 'no-cors'` — cepat (~50ms), resolves segera  
-**Write path (QC Assembling):** `_jsonpRaw()` — menunggu callback GAS sebelum request berikutnya dikirim → **order terjamin, no duplicates**
-
-### Fungsi Kunci
-
-| Fungsi | Lokasi | Deskripsi |
-|--------|--------|-----------|
-| `saveEvent(dept)` | ~line 5051 | Simpan event: optimistic local → background GAS |
-| `processScan(dept)` | ~line 4683 | Handle QR scan → autofill form |
-| `normalizeSheetRow(r)` | ~line 4989 | Normalisasi field GAS (string/int, alias) |
-| `fetchFromSheets()` | ~line 4980 | JSONP read dari GAS, normalize |
-| `loadFromSheets()` | ~line 5037 | Manual sync: merge Sheets + local by `ts` |
-| `doTrack()` | ~line 5442 | Track WS: search + show-all |
-| `_renderTrackCards()` | ~line 5490 | Render card timeline WS |
-| `ppicMatGateUpdate()` | ~line 4500 | Show/hide PPIC material gate warning |
-| `addPpicMatRow()` | ~line 4243 | Gate-checked add material row |
-| `savePpicMat()` | ~line 4300 | Save material list + toast notifikasi |
-| `jumpToWs(ws)` | ~line 6850 | Dashboard → Track WS dengan WS tertentu |
-| `_jsonpRaw()` | ~line 4965 | True JSONP write (menunggu GAS response) |
-| `postToSheets(p)` | ~line 4976 | Wrapper: jsonpCall → GAS appendEvent |
-
-### Navigation Architecture
-`window.switchTool` di-wrap **3 kali**:
-1. `switchTool_orig` — navigasi dasar + Track WS init
-2. Nemesis wrapper — indikator animasi posisi
-3. V32 wrapper — spark effects
-
-`window.saveEvent` di-wrap **2 kali**:
-1. Progress tracker wrapper (show/hide progress bar)
-2. QC login check wrapper
+| Column | Description |
+|---|---|
+| `no_ws` | Work order |
+| `routing_seq` | Step sequence number |
+| `routing_op` | Operation name (BUBUT, MILLING, etc.) |
+| `routing_dur` | Duration estimate |
+| `routing_status` | PENDING / IN PROGRESS / DONE |
 
 ---
 
-## Setup & Konfigurasi
+## File Structure
 
-### 1. Deploy
-File `index.html` adalah self-contained — tidak ada dependency eksternal selain font Google Fonts dan CDN icons. Cukup upload ke GitHub Pages atau hosting statis manapun.
-
-### 2. Google Apps Script
-Siapkan GAS script dengan endpoint `doGet(e)` yang mendukung:
-- `action=jsonp` + `subAction=appendEvent` — append satu row event ke Sheets
-- `action=jsonp` + `subAction=getEvents` — return semua events sebagai JSON
-- `action=jsonp` + `subAction=generateWsRange` — generate range WS Assembling
-
-Deploy sebagai **Web App** dengan akses: `Anyone, even anonymous`.
-
-### 3. Hubungkan ke Sheets
-1. Buka sistem di browser
-2. Klik ⚙️ (Settings) di kanan atas
-3. Paste URL Web App GAS ke field **Web App URL**
-4. Klik Save
-
-### 4. Sync Data Pertama
-- Klik ⚙️ → **☁️ Load from Sheets** untuk menarik semua data existing
+```
+index.html          ← Main ERP app (single file, self-contained)
+Code.gs             ← Google Apps Script backend
+README.md           ← This file
+```
 
 ---
 
-## Struktur Data
+## GAS subActions
 
-### Event Object
-```json
-{
-  "ts": "2026-04-25T08:30:00.000Z",
-  "department": "Marketing",
-  "event": "Order Created",
-  "no_ws": "26030011",
-  "customer": "AHM",
-  "no_po": "N309195",
-  "part": "Nama Part",
-  "qty": 5,
-  "deadline": "2026-05-31",
-  "ws_type": "ASSEMBLING",
-  "ws_start": "26030011-01",
-  "ws_end_suffix": 5,
-  "user": "Dicky S",
-  "remarks": "",
-  "drawing_ref": "",
-  "drawing_thumbnail": ""
-}
-```
+| subAction | Direction | Description |
+|---|---|---|
+| `appendEvent` | Write | Save one event to `Events` sheet |
+| `appendRouting` | Write | Save routing step(s) to `RoutingProcess` |
+| `listEvents` | Read | Return all rows from `Events` as JSON |
+| `listRouting` | Read | Return all rows from `RoutingProcess` as JSON |
+| `generateWsRange` | Write | Batch-create Assembling child WS in `Events` |
 
-### Material Item (PPIC)
-```json
-{
-  "id": "m1714000000_ab12",
-  "name": "26030011-01",
-  "item_type": "ASSEMBLING",
-  "material": "S45C",
-  "len": "200", "wid": "50", "thk": "30", "dia": "",
-  "qty": 1,
-  "mat_source": "STOCK",
-  "harden": "YES",
-  "hrc": "58-62",
-  "notes": ""
-}
-```
+All communication uses **JSONP** (no CORS issues, works on mobile Safari).
 
 ---
 
 ## Changelog
 
-### V39 (Current)
-- ✅ **Police line warning** "JANGAN LUPA PRINT QR CODE" di bawah Save Single Part dan Save Assembling
-- ✅ **Tombol 📖 How to Use** di topbar — modal SOP flow chart per divisi
-- ✅ **Fix div imbalance** — closing `</div>` yang hilang dari `mkt-form-single` dan `mkt-form-assy` (menyebabkan Engineering, PPIC, Production, QC, Accounting, Tools tidak muncul)
+### V44 (Current)
+- Font changed to **Inter** (UI) + **JetBrains Mono** (codes) — Segoe UI family, readable on all screens
+- Event names, NO_WS, division labels → **bold** in all tables and timeline
+- Timestamps → Inter 11.5px medium (no more monospace timestamps)
+- Table borders → **2px** throughout all divisions
+- Buttons → Inter semibold, industrial flat style
+- T&C modal → **always light mode**, Inter body font
+- `saveRoutingToSheets` → fixed to use `jsonpCall` instead of `fetch no-cors` (data now actually reaches Sheets)
+- `appendRouting` added to `isWrite` in `jsonpCall`
+- Status messages (`smsg`) → Inter font for readability
+- Version bumped from V42 → V44
 
-### V38
-- ✅ **QC Assembling — no doubles:** ganti `postToSheets` (fetch no-cors) dengan `_jsonpRaw` untuk sequential write; setiap write menunggu konfirmasi GAS sebelum request berikutnya → eliminasi duplicate rows di Sheets
-- ✅ **QC Assembling — true ordering:** parent → child-01 → child-02 → ... dijamin berurutan di Sheets
-- ✅ **PPIC success toast:** `savePpicMat()` menampilkan toast notifikasi hijau saat material berhasil disimpan
-- ✅ **PPIC info gate:** `addPpicMatRow()` dan `savePpicMat()` diblokir jika PPIC Info belum disave ke Sheets; warning banner `#ppic-mat-gate-warn` muncul otomatis
-
-### V37
-- ✅ Fix Track WS history kosong — type mismatch `no_ws` integer vs string dari Sheets
-- ✅ Fix printLog WS history tidak muncul
-- ✅ `normalizeSheetRow`: `.trim()` + `String()` pada semua ID field setelah aliasing
-- ✅ Card WS auto-expanded (`ws-card-body open`)
-
-### V36
-- ✅ `doTrack()` empty query → show 60 WS terbaru (tidak silent return)
-- ✅ `switchTool_orig` Track WS: reset mode + auto-call `doTrack()`
-- ✅ `clearTrack()` re-call `doTrack()` setelah clear
-- ✅ `_renderTrackCards()` sebagai shared helper
-
-### V35
-- ✅ Fix `jumpToWs()` — reset `trackMode='ws'` sebelum call `doTrack()` (bug: jika user sebelumnya di tab "BY CUSTOMER", track tidak muncul)
-
-### V34
-- ✅ T&C checkbox default `checked`; CSS light-mode override untuk T&C screen
-- ✅ `normalizeSheetRow()` — lowercase semua field GAS, mapping alias, stringify key fields
-- ✅ `fetchFromSheets()` limit 500 → 9999; normalize-before-filter
-- ✅ `saveEvent()` — optimistic local save (instant), GAS push background
-- ✅ Camera QR autofill timeout 260ms → 350ms; `trackMode` force `'ws'`
-
-### V33
-- ✅ Camera QR scanning via `getUserMedia`
-- ✅ Auto-fill form dari QR scan
-- ✅ Track WS dengan camera button
+### V42.1 (GAS)
+- Added `listRouting` handler
+- Fixed `handleListEvents` to not skip rows with empty `ts`
+- `appendRouting` supports batch (array) and single row
+- All extended Marketing fields (`ws_start`, `ws_end_suffix`) included in `listEvents`
 
 ---
 
-## Known Issues
+## Browser Support
 
-| Issue | Status | Keterangan |
-|-------|--------|------------|
-| `view-coo` div imbalance -3 | Pre-existing | Ada di file original sebelum V33; tidak mempengaruhi fungsi karena view-coo tidak digunakan aktif |
-| GAS slow response (>15s) | Edge case | `_jsonpRaw` timeout 15s; jika GAS lambat, QC assembling akan fallback ke `fetch no-cors` + 600ms delay |
-| iOS Safari fetch no-cors | Mitigated | Untuk QC assembling sudah pakai `_jsonpRaw`; divisi lain pakai fetch no-cors yang bisa gagal di iOS → fallback `_jsonpRaw` via `.catch()` |
+| Browser | Support |
+|---|---|
+| Chrome / Edge 90+ | ✅ Full |
+| Safari 15+ (iOS/macOS) | ✅ Full incl. camera scan |
+| Firefox 88+ | ✅ Full |
+| Samsung Internet | ✅ |
 
----
-
-## File Info
-
-```
-File    : index.html
-Lines   : ~8,257
-Size    : ~650 KB
-JS      : 5 inline script blocks, ~4,000 lines
-CSS     : ~1,600 lines inline
-Views   : 17 (dashboard + 6 divisi + 10 tools)
-```
+> **Note:** Requires a live GAS deployment URL for Sheets sync. Offline mode (localStorage only) works without internet.
 
 ---
 
-*PT KMIL Industrial Work Order System — maintained by internal IT*
+## License
+
+Internal tool — PT KMIL. Not for redistribution.
