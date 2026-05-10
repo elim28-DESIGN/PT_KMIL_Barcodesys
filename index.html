@@ -10,7 +10,7 @@
 <meta name="description" content="PT KMIL — Multi-Division Work Order System">
 <!-- Apple touch icon (inline SVG→PNG via canvas not needed, use emoji fallback) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307060f'/%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%236d28d9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='50' y='66' text-anchor='middle' font-size='44' font-family='Arial Black,Arial' font-weight='900' fill='white'%3EKM%3C/text%3E%3C/svg%3E">
-<title>PT KMIL — ERP System V45.1</title>
+<title>PT KMIL — ERP System V45.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script><style>
@@ -2454,7 +2454,7 @@ body::before{
   <div style="background:color-mix(in srgb,var(--ppic) 15%,var(--card));padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid color-mix(in srgb,var(--ppic) 20%,var(--border))">
     <span style="font-size:16px">📦</span>
     <span style="font-family:var(--cond);font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--ppic)">PPIC — Planning & BOM</span>
-    <span style="margin-left:auto;font-size:9px;font-family:var(--mono);color:var(--muted)">User: Kiki</span>
+    <span style="margin-left:auto;font-size:9px;font-family:var(--mono);color:var(--muted)">User: Maedeny</span>
   </div>
   <div style="padding:10px 14px;display:flex;flex-direction:column;gap:6px">
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px">
@@ -3026,12 +3026,18 @@ body::before{
 </div>
 <!-- WS Turun ke PPIC (shown when Drawing Released) -->
 <div id="eng-ws-turun" style="display:none;margin-top:8px">
-<!-- SINGLE PART: radio turun semua / parsial -->
+<!-- SINGLE PART: auto turun semua — no radio choice shown -->
 <div id="eng-turun-single" style="padding:9px 11px;background:var(--card);border:1px solid var(--border2);border-radius:7px">
 <div style="font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;margin-bottom:7px">Status WS Turun ke PPIC</div>
-<div style="display:flex;gap:10px">
-<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="ws-turun" id="wt-semua" value="SEMUA"> Turun Semua</label>
-<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="ws-turun" id="wt-parsial" value="PARSIAL"> Turun Parsial</label>
+<!-- Hidden radio auto-checked SEMUA so getPayload still reads it -->
+<input type="radio" name="ws-turun" id="wt-semua" value="SEMUA" checked style="display:none">
+<input type="radio" name="ws-turun" id="wt-parsial" value="PARSIAL" style="display:none">
+<!-- Visual: just show auto badge, no user choice needed for single part -->
+<div style="display:flex;align-items:center;gap:8px">
+  <div style="background:color-mix(in srgb,var(--ok-t) 12%,transparent);border:1px solid color-mix(in srgb,var(--ok-t) 35%,transparent);border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;font-family:var(--mono);color:var(--ok-t);display:flex;align-items:center;gap:6px">
+    ✅ <span>TURUN SEMUA</span>
+  </div>
+  <span style="font-size:10px;color:var(--muted);font-family:var(--mono);font-style:italic">Auto — Single Part selalu turun semua</span>
 </div>
 <div id="wt-parsial-detail" style="display:none;margin-top:7px">
 <div class="field"><label>Detail WS yang Turun (parsial)</label><input id="eng-wt-detail" placeholder="misal: -01 s/d -05, atau list WS..."></div>
@@ -3082,7 +3088,7 @@ body::before{
 <div class="fr fr2" style="margin-bottom:8px">
 <div class="field"><label>Part Name</label><input id="eng-part" readonly=""></div>
 <div class="field"><label>User</label>
-<select id="eng-user"><option value="">— Pilih —</option><option>Andry</option><option>Fadhil</option><option>Pram</option><option>Heri</option></select>
+<select id="eng-user"><option value="">— Pilih —</option><option>Andry</option><option>Fadhil</option><option>Pram</option><option>Heri</option><option>Prakoso</option></select>
 </div>
 </div>
 <div class="field" style="margin-bottom:8px"><label>Remarks</label><textarea id="eng-remarks" placeholder="Catatan teknis, revisi, nomor drawing..."></textarea></div>
@@ -3139,8 +3145,8 @@ body::before{
 </div>
 <div class="fr fr2" style="margin-bottom:8px">
 <div class="field"><label>User PPIC</label>
-<input id="ppic-user" value="Kiki" readonly="" style="background:color-mix(in srgb,var(--ppic) 10%,var(--inp));border-color:color-mix(in srgb,var(--ppic) 40%,transparent);color:var(--ppic);font-weight:700;cursor:not-allowed">
-<div class="field-note">🔒 User terkunci — hanya Kiki</div>
+<input id="ppic-user" value="Maedeny" readonly="" style="background:color-mix(in srgb,var(--ppic) 10%,var(--inp));border-color:color-mix(in srgb,var(--ppic) 40%,transparent);color:var(--ppic);font-weight:700;cursor:not-allowed">
+<div class="field-note">🔒 User terkunci — hanya Maedeny</div>
 </div>
 <div class="field"><label>Remarks</label><textarea id="ppic-remarks" placeholder="Catatan planning..."></textarea></div>
 </div>
@@ -4048,7 +4054,7 @@ body::before{
 <div class="tl-dept" style="color:var(--ppic)">PPIC</div>
 <div class="tl-ev">BOM Released</div>
 <div class="tl-meta">WS: 26030003 · 21/4/2026, 14.44.23</div>
-<div class="tl-meta">Cust: KPI · User: Kiki</div>
+<div class="tl-meta">Cust: KPI · User: Maedeny</div>
 <div class="tl-meta">Deadline: <span style="color:#f87171;font-weight:700">2026-03-18 🚨</span></div>
 <div style="margin-top:2px"><span class="tl-badge">BOM_RELEASED</span></div></div><div class="tl-item">
 <div class="tl-dept" style="color:var(--eng)">Engineering</div>
@@ -4146,7 +4152,7 @@ body::before{
 <div class="tl-dept" style="color:var(--ppic)">PPIC</div>
 <div class="tl-ev">BOM Released</div>
 <div class="tl-meta">WS: 26040008 · 21/4/2026, 14.00.24</div>
-<div class="tl-meta">Cust: STOCKLIN · User: Kiki</div>
+<div class="tl-meta">Cust: STOCKLIN · User: Maedeny</div>
 <div class="tl-meta">Deadline: <span style="color:#f87171;font-weight:700">2026-04-14 🚨</span></div>
 <div class="tl-meta" style="font-style:italic">60 kg jasa only</div>
 <div style="margin-top:2px"><span class="tl-badge">BOM_RELEASED</span></div></div><div class="tl-item">
@@ -4922,6 +4928,8 @@ if(isAssy) renderEngAssyList(ws);
 else {const single=$i('eng-turun-single'); const assy=$i('eng-turun-assy');
 if(single) single.style.display='block';
 if(assy) assy.style.display='none';
+/* Single Part: always auto-select SEMUA, hide parsial choice */
+const wtSemua=$i('wt-semua');if(wtSemua) wtSemua.checked=true;
 const engMktWsListWrap=$i('eng-mkt-ws-list');
 if(engMktWsListWrap) engMktWsListWrap.style.display='none';}}
 if(dept==='PPIC'){const banner=$i('ppic-type-sync-banner');
@@ -5672,8 +5680,17 @@ window[cb]=data=>{cleanup();res(data);};
 document.body.appendChild(s);});}
 async function postToSheets(p){const cfg=JSON.parse(localStorage.getItem(CK)||'{}');
 if(!cfg.webAppUrl) throw new Error('Web App URL belum diisi di Settings.');
+const url=new URL(cfg.webAppUrl);
+url.searchParams.set('action','jsonp');
+url.searchParams.set('subAction','appendEvent');
+url.searchParams.set('payload',JSON.stringify({...p,drawing_thumbnail:''}));
+url.searchParams.set('callback','_kmilNoop');
+/* Fast fire-and-forget: no-cors fetch with keepalive avoids waiting for response */
+try{await fetch(url.toString(),{method:'GET',mode:'no-cors',keepalive:true});}
+catch(e){/* Fallback: JSONP for environments that block no-cors */
 const data=await jsonpCall(cfg.webAppUrl,{subAction:'appendEvent',payload:JSON.stringify({...p,drawing_thumbnail:''})});
-if(!data.ok) throw new Error(data.error||'Failed.');return data;}
+if(!data.ok) throw new Error(data.error||'Failed.');}
+return {ok:true};}
 async function fetchFromSheets(){const cfg=JSON.parse(localStorage.getItem(CK)||'{}');
 if(!cfg.webAppUrl) throw new Error('Web App URL belum diisi di Settings ⚙️');
 const data=await jsonpCall(cfg.webAppUrl,{subAction:'listEvents',limit:'9999'});
@@ -5714,6 +5731,7 @@ function normalizeSheetRow(r){
     'parsial_qty':['parsial_qty','parsialqty','partial_qty'],
     'sj_filename':['sj_filename','sjfilename'],
     'drawing_filename':['drawing_filename','drawingfilename'],
+    'assy_qty_json':['assy_qty_json','assyqtyjson','qty_json','child_qty_json'],
   };
   Object.keys(aliases).forEach(canonical=>{
     if(!n[canonical]){
@@ -5766,14 +5784,17 @@ if(remarksEl){remarksEl.style.borderColor='#ef4444';remarksEl.focus();}
 return;}}}
 const p=getPayload(d);const err=validatePayload(p);
 if(err) return setMsg(d,'✗ '+err,'err');
-/* ── OPTIMISTIC LOCAL SAVE FIRST (instant response) ── */
+/* ── FAST LOCAL SAVE (synchronous, instant) ── */
 if(d==='Marketing'&&fileData.draw.fileName) saveDrawingLocally(p.no_ws,p.customer,p.part);
 if(d==='Marketing'&&ppicMatRows.length) savePpicMat();
-const rows=evs();rows.push(p);saveEvs(rows);renderTimeline();
+const rows=evs();rows.push(p);saveEvs(rows);
+/* ── DEFERRED UI UPDATE: don't block the save response ── */
 setMsg(d,'✓ Saved! (sync ke Sheets...)','ok');
-if(d==='Marketing') setTimeout(renderQrFinderList,80);
-/* Refresh production events log panel after save */
-if(d==='Production') setTimeout(()=>renderPrdEventsLog(p.no_ws),100);
+requestAnimationFrame(()=>{
+  renderTimeline();
+  if(d==='Marketing') setTimeout(renderQrFinderList,50);
+  if(d==='Production') setTimeout(()=>renderPrdEventsLog(p.no_ws),60);
+});
 /* ── QC ASSEMBLING: ordered save — parent first, then each child in sequence ── */
 if(d==='QC'){
   /* String-safe mktRef lookup (Sheets may return no_ws as integer) */
@@ -7175,6 +7196,8 @@ return `<div style="display:flex;align-items:center;gap:8px;padding:3px 6px;back
 engMktWsListWrap.style.display='block';}} else if(engMktWsListWrap){engMktWsListWrap.style.display='none';}
 if(!mkt||mkt.ws_type!=='ASSEMBLING'){single.style.display='block';
 assy.style.display='none';
+/* Single Part always auto SEMUA */
+const wtSemua=$i('wt-semua');if(wtSemua) wtSemua.checked=true;
 _engAssyWsList=[];
 return;}
 single.style.display='none';
@@ -7236,10 +7259,12 @@ if(!wt&&$i('wt-semua')){if(pct===100) $i('wt-semua').checked=true;
 else if(done>0) $i('wt-parsial').checked=true;}}
 initTheme();initPills();initQcSplitPills();loadConfig();renderTimeline();renderQR();renderPpicMatTable();renderSTList();handleWsTypeChange();updateQcLockState();updateClock();
 updateQcLockState();
+/* ── AUTO-SYNC ON STARTUP: load from Sheets immediately ── */
 (function kmilAutoSync(){try{const cfg=JSON.parse(localStorage.getItem('kmil_v2_config')||'{}');
 if(!cfg.webAppUrl) return;
 const topTxt=document.getElementById('topTxt');
 if(topTxt) topTxt.textContent='⏳ Syncing...';
+const TIMEOUT=14000;
 const cbName='_kmilAS'+Date.now();
 const url=new URL(cfg.webAppUrl);
 url.searchParams.set('action','jsonp');
@@ -7247,33 +7272,44 @@ url.searchParams.set('subAction','listEvents');
 url.searchParams.set('limit','9999');
 url.searchParams.set('callback',cbName);
 let done=false;
-window[cbName]=function(data){done=true;
-try{if(document.head.contains(s)) document.head.removeChild(s);
-delete window[cbName];
-if(data&&data.ok&&Array.isArray(data.rows)&&data.rows.length>0){
-/* Normalize field names FIRST, then filter for valid rows */
-const sheetRows=data.rows
-  .filter(r=>r&&typeof r==='object')
-  .map(r=>(typeof normalizeSheetRow==='function')?normalizeSheetRow(r):r)
-  .filter(r=>r&&r.ts&&r.no_ws);
-const localRows=JSON.parse(localStorage.getItem('kmil_v10_events')||'[]');
-const sheetTs=new Set(sheetRows.map(r=>String(r.ts)));
-const localOnly=localRows.filter(r=>!sheetTs.has(String(r.ts)));
-const merged=[...sheetRows,...localOnly].sort((a,b)=>new Date(a.ts)-new Date(b.ts));
-localStorage.setItem('kmil_v10_events',JSON.stringify(merged));
-if(typeof renderTimeline==='function') renderTimeline();
-if(typeof updateSbWsCount==='function') updateSbWsCount();
-const dash=document.getElementById('view-dashboard');
-if(dash&&dash.classList.contains('active')&&typeof renderDashboard==='function'){renderDashboard();
-setTimeout(()=>{ if(typeof renderDashCharts==='function') renderDashCharts(merged); },80);}
-if(topTxt) topTxt.textContent='✓ Synced ('+merged.length+' events)';
-setTimeout(()=>{ if(topTxt) topTxt.textContent='Ready'; },3000);} else {if(topTxt) topTxt.textContent='Ready';}}catch(ex){ if(topTxt) topTxt.textContent='Ready'; }
+function applySync(data){
+  try{if(!data||!data.ok||!Array.isArray(data.rows)||!data.rows.length){if(topTxt) topTxt.textContent='Ready';return;}
+  const sheetRows=data.rows
+    .filter(r=>r&&typeof r==='object')
+    .map(r=>(typeof normalizeSheetRow==='function')?normalizeSheetRow(r):r)
+    .filter(r=>r&&r.ts&&r.no_ws);
+  const localRows=JSON.parse(localStorage.getItem('kmil_v10_events')||'[]');
+  const sheetTs=new Set(sheetRows.map(r=>String(r.ts)));
+  const localOnly=localRows.filter(r=>!sheetTs.has(String(r.ts)));
+  const merged=[...sheetRows,...localOnly].sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  localStorage.setItem('kmil_v10_events',JSON.stringify(merged));
+  /* Batch UI refresh via rAF to avoid blocking */
+  requestAnimationFrame(()=>{
+    if(typeof renderTimeline==='function') renderTimeline();
+    if(typeof updateSbWsCount==='function') updateSbWsCount();
+    if(typeof renderQrFinderList==='function') renderQrFinderList();
+    const dash=document.getElementById('view-dashboard');
+    if(dash&&dash.classList.contains('active')&&typeof renderDashboard==='function'){
+      renderDashboard();
+      setTimeout(()=>{ if(typeof renderDashCharts==='function') renderDashCharts(merged); },80);
+    }
+  });
+  if(topTxt){topTxt.textContent='✓ Synced ('+merged.length+' events)';
+  setTimeout(()=>{ if(topTxt) topTxt.textContent='Ready'; },2500);}
+  if(typeof showToast==='function') showToast('Auto-sync: '+sheetRows.length+' events dari Sheets ✓','ok',2500);
+  }catch(ex){if(topTxt) topTxt.textContent='Ready';}
+}
+window[cbName]=function(data){if(done) return;done=true;
+  try{if(s&&s.parentNode) s.parentNode.removeChild(s);}catch(e){}
+  delete window[cbName];
+  applySync(data);
 };
-const s=document.createElement('script');
-s.src=url.toString();
-s.onerror=function(){if(!done){ done=true; delete window[cbName]; if(topTxt) topTxt.textContent='Ready (offline)'; }};
-setTimeout(function(){ if(!done){ done=true; delete window[cbName]; if(topTxt) topTxt.textContent='Ready'; } },12000);
-document.head.appendChild(s);}catch(ex){ console.warn('AutoSync error:',ex); }})();
+const s=document.createElement('script');s.src=url.toString();
+s.onerror=function(){if(!done){done=true;delete window[cbName];if(topTxt) topTxt.textContent='Ready (offline)';}};
+/* Auto-timeout */
+setTimeout(function(){if(!done){done=true;try{if(s&&s.parentNode)s.parentNode.removeChild(s);}catch(e){}
+delete window[cbName];if(topTxt) topTxt.textContent='Ready';}},TIMEOUT);
+document.head.appendChild(s);}catch(ex){console.warn('AutoSync error:',ex);}})();
 (function(){try{const stored=JSON.parse(localStorage.getItem('kmil_v10_dt')||'{}');
 if(stored.machines&&stored.machines.length) window._kmilDtM=stored.machines;
 if(stored.data) window._kmilDtD=stored.data;}catch(e){}})();
