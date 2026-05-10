@@ -10,7 +10,7 @@
 <meta name="description" content="PT KMIL — Multi-Division Work Order System">
 <!-- Apple touch icon (inline SVG→PNG via canvas not needed, use emoji fallback) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307060f'/%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%236d28d9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='50' y='66' text-anchor='middle' font-size='44' font-family='Arial Black,Arial' font-weight='900' fill='white'%3EKM%3C/text%3E%3C/svg%3E">
-<title>PT KMIL — ERP System V45</title>
+<title>PT KMIL — ERP System V45.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script><style>
@@ -3261,13 +3261,20 @@ body::before{
 <!-- ── Jumlah Routing Selector ── -->
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:color-mix(in srgb,var(--prd) 5%,var(--card));border-radius:5px;border:1px solid color-mix(in srgb,var(--prd) 20%,transparent)">
 <span style="font-size:12px;font-family:var(--mono);color:var(--muted);white-space:nowrap">Jumlah Routing:</span>
-<select id="prd-routing-count-sel" class="mat-sel" style="max-width:90px;font-size:14px;font-weight:700" onchange="setRoutingCount(parseInt(this.value))">
+<select id="prd-routing-count-sel" class="mat-sel" style="max-width:90px;font-size:14px;font-weight:700" onchange="handleRoutingCountChange(this)">
 <option value="0">— Pilih</option>
 <option value="1">1</option><option value="2">2</option><option value="3">3</option>
 <option value="4">4</option><option value="5">5</option><option value="6">6</option>
 <option value="7">7</option><option value="8">8</option><option value="9">9</option>
 <option value="10">10</option>
+<option value="custom">Custom...</option>
 </select>
+<div id="prd-routing-custom-row" style="display:none;align-items:center;gap:6px">
+  <input id="prd-routing-custom-inp" type="number" min="11" max="200" placeholder="11–200"
+    style="width:72px;padding:5px 7px;background:var(--inp);border:1.5px solid var(--prd);border-radius:4px;color:var(--text);font-size:13px;font-family:var(--mono);font-weight:700;outline:none"
+    oninput="applyCustomRoutingCount(this.value)">
+  <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">max 200</span>
+</div>
 <span style="font-size:11px;color:var(--faint);font-family:var(--mono)">step routing per WS</span>
 <button class="btn btn-s" style="font-size:11px;color:#8b5cf6;border-color:#8b5cf6;margin-left:auto" onclick="autoFillRoutingFromType()">⚡ Auto-fill</button>
 <button class="btn btn-s" style="font-size:11px" onclick="clearRoutingRows()">🗑 Clear</button>
@@ -3290,6 +3297,7 @@ body::before{
 </div>
 <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
 <button class="btn btn-green" style="font-size:13px;font-weight:700;padding:7px 16px" onclick="saveRoutingToSheets()">💾 Save Routing to Sheets</button>
+<button class="btn btn-s" style="font-size:11px;color:var(--prd);border-color:var(--prd)" onclick="addRoutingRow()">+ Add Row</button>
 <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">WS + semua step → Sheet "RoutingProcess"</span>
 </div>
 <div id="prd-routing-msg" class="smsg" style="margin-top:7px"></div>
@@ -3450,13 +3458,15 @@ body::before{
 <button class="btn btn-s" style="color:#8b5cf6;border-color:#8b5cf6" onclick="printAssyPartsLog()">🖨️ Print Assy Parts</button>
 </div>
 <div id="status-Production" class="smsg"></div>
-<!-- ── PRODUCTION EVENTS MINI LOG (merged, auto-updates on scan) ── -->
-<div id="prd-events-log-wrap" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
-<div style="font-size:10px;font-family:var(--mono);color:var(--prd);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:7px">
-  📋 History Production Events untuk WS ini
+<!-- ── PRODUCTION EVENTS MINI LOG — merged below Production Data, always visible after scan ── -->
+<div id="prd-events-log-wrap" style="display:none;margin-top:16px">
+<div style="border-top:2px solid color-mix(in srgb,var(--prd) 40%,var(--border));padding-top:12px">
+<div style="font-size:9px;font-family:var(--mono);color:var(--prd);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:7px;font-weight:700">
+  📋 History Production Events — WS ini
   <span id="prd-events-log-count" style="font-size:9px;background:color-mix(in srgb,var(--prd) 15%,transparent);border:1px solid color-mix(in srgb,var(--prd) 30%,transparent);padding:1px 8px;border-radius:10px;color:var(--prd)"></span>
 </div>
-<div id="prd-events-log-inner"></div>
+<div id="prd-events-log-inner" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden"></div>
+</div>
 </div>
 </div>
 </div>
@@ -4285,6 +4295,26 @@ if(tool==='downtime') initDt();
 if(tool==='stock') renderStockTable();
 showView('view-'+tool);}
 function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));const v=$i(id);if(v)v.classList.add('active');}
+
+/* updateMobileNav — sync active state on bottom mobile nav bar */
+function updateMobileNav(el){
+  if(!el) return;
+  document.querySelectorAll('#mobile-nav .mn-item').forEach(b=>b.classList.remove('active'));
+  if(el.closest && el.closest('.mn-item')) el.closest('.mn-item').classList.add('active');
+  else if(el.classList && el.classList.contains('mn-item')) el.classList.add('active');
+}
+
+/* addRoutingRow — manually add 1 routing row */
+function addRoutingRow(){
+  const noWs=$i('prd-noWs')?.value||'';
+  const id='rr'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  routingRows.push({id,ws:noWs,op:'',dur:'',status:'IN PROGRESS'});
+  syncRoutingSel(routingRows.length);
+  renderRoutingTable();updateRoutingCount();
+  /* Scroll routing table to bottom so new row is visible */
+  const tbl=document.getElementById('prd-routing-table');
+  if(tbl) tbl.scrollIntoView({block:'end',behavior:'smooth'});
+}
 function openModal(id){$i(id).classList.add('open');}
 function closeModal(id){$i(id).classList.remove('open');}
 document.querySelectorAll('.modal-ov').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
@@ -4962,7 +4992,7 @@ if(dept==='Production'){
   const rb=$i('prd-routing-ws-badge');if(rb)rb.textContent='· WS: '+ws;
   const sb=$i('prd-routing-sync-saved-badge');
   if(sb){const _rSt=getRoutingSt()[ws];sb.style.display=(_rSt&&_rSt.saved_to_sheets)?'inline':'none';}
-  const _csel=$i('prd-routing-count-sel');if(_csel) _csel.value=routingRows.length||0;
+  syncRoutingSel(routingRows.length||0);
   setTimeout(()=>renderPrdEventsLog(ws),80);
 }
 if(dept==='QC'){const _qel=$i('qc-noWs'); if(_qel) _qel.value=ws;
@@ -5019,6 +5049,10 @@ p.deadline=_isAssy?($i('mkt-deadline-assy')?.value||''):($i('mkt-deadline')?.val
 p.remarks=_isAssy?($i('mkt-remarks-assy')?.value.trim()||''):($i('mkt-remarks')?.value.trim()||'');
 p.drawing_filename=fileData.draw?.fileName||'';
 p.ws_start=$i('wsStart')?.value.trim()||'';p.ws_end_suffix=Number($i('wsEndSuffix')?.value||0);
+/* Store per-child qty map so QR print-all can retrieve correct qty per child */
+if(_isAssy&&Object.keys(mktAssyQtyData).length){
+  try{p.assy_qty_json=JSON.stringify(mktAssyQtyData);}catch(e){}
+}
 break;}
 case 'Engineering':{p.no_ws=$i('eng-noWs').value;p.no_po=$i('eng-noPo').value;p.customer=$i('eng-customer').value;
 p.part=$i('eng-part').value;p.deadline=$i('eng-deadline').value;
@@ -5225,6 +5259,28 @@ function getRoutingSt(){try{return JSON.parse(localStorage.getItem(RTK)||'{}')}c
 function saveRoutingSt(d){localStorage.setItem(RTK,JSON.stringify(d));}
 
 /* ── setRoutingCount: called when number selector changes ── */
+function syncRoutingSel(n){
+  const sel=$i('prd-routing-count-sel');
+  const customRow=$i('prd-routing-custom-row');
+  if(!sel) return;
+  if(n<=10){sel.value=n||0;if(customRow)customRow.style.display='none';}
+  else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('prd-routing-custom-inp');if(ci)ci.value=n;}}
+}
+function handleRoutingCountChange(sel){
+  const customRow=$i('prd-routing-custom-row');
+  if(sel.value==='custom'){
+    if(customRow) customRow.style.display='flex';
+    /* Don't change rows yet — wait for user to type */
+  } else {
+    if(customRow) customRow.style.display='none';
+    setRoutingCount(parseInt(sel.value));
+  }
+}
+function applyCustomRoutingCount(val){
+  const n=parseInt(val)||0;
+  if(n<1||n>200) return;
+  setRoutingCount(n);
+}
 function setRoutingCount(n){
   const noWs=$i('prd-noWs')?.value||'';
   if(isNaN(n)||n<1){routingRows=[];renderRoutingTable();updateRoutingCount();return;}
@@ -5242,7 +5298,12 @@ function delRoutingRow(id){
   routingRows=routingRows.filter(r=>r.id!==id);
   /* Sync selector */
   const sel=$i('prd-routing-count-sel');
-  if(sel) sel.value=routingRows.length||0;
+  const customRow=$i('prd-routing-custom-row');
+  if(sel){
+    const n=routingRows.length;
+    if(n<=10){sel.value=n||0;if(customRow)customRow.style.display='none';}
+    else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('prd-routing-custom-inp');if(ci)ci.value=n;}}
+  }
   renderRoutingTable();updateRoutingCount();
 }
 function rrSet(id,field,val){
@@ -5253,6 +5314,7 @@ function clearRoutingRows(){
   if(routingRows.length&&!confirm('Clear semua routing rows?')) return;
   routingRows=[];
   const sel=$i('prd-routing-count-sel');if(sel) sel.value=0;
+  const customRow=$i('prd-routing-custom-row');if(customRow)customRow.style.display='none';
   renderRoutingTable();updateRoutingCount();
 }
 function updateRoutingCount(){
@@ -5372,7 +5434,7 @@ function autoFillRoutingFromType(){
       routingRows.push({id,ws:noWs,op,dur:'',status:'IN PROGRESS'});
     });
   }
-  const sel=$i('prd-routing-count-sel');if(sel) sel.value=routingRows.length;
+  syncRoutingSel(routingRows.length);
   renderRoutingTable();updateRoutingCount();
   const m=$i('prd-routing-msg');
   if(m){m.textContent=`✓ Auto-filled ${routingRows.length} routing step untuk WS ${noWs}.`;m.className='smsg ok';}
@@ -5485,7 +5547,7 @@ function loadRoutingForWs(ws){
       dur:r.routing_dur||r.dur||'',
       status:r.routing_status||r.status||'IN PROGRESS'
     }));
-    const sel=$i('prd-routing-count-sel');if(sel) sel.value=routingRows.length;
+    syncRoutingSel(routingRows.length);
     renderRoutingTable();updateRoutingCount();
     const savedBadge=$i('prd-routing-sync-saved-badge');
     if(savedBadge) savedBadge.style.display=saved.saved_to_sheets?'inline':'none';
@@ -6108,16 +6170,23 @@ if(_qrfTab==='assy')   items=items.filter(i=>i.ws_type==='ASSEMBLING');
 if(q) items=items.filter(i=>i.ws.toLowerCase().includes(q)||i.customer.toLowerCase().includes(q));
 if(custFilter) items=items.filter(i=>(i.customer||'').toLowerCase().includes(custFilter));
 if(!items.length){showToast('Tidak ada WS untuk diprint.','warn');return;}
-/* Expand assembling to include children */
+/* Expand assembling to include children — carry per-child qty from mktAssyQtyData */
 const expanded=[];
+const allEvs=evs();
 items.forEach(item=>{
-  expanded.push({...item,isChild:false});
+  expanded.push({...item,isChild:false,childQty:null});
   if(item.ws_type==='ASSEMBLING'){const children=getChildWsList(item.ws);
-  children.forEach(ch=>expanded.push({ws:ch,customer:item.customer,part:item.part,ws_type:'CHILD',no_po:item.no_po,deadline:item.deadline,isChild:true}));}
+  /* Try to get per-child qty from: 1) mktAssyQtyData (live session), 2) assy_qty_json (persisted in event) */
+  const parentEvt=allEvs.find(r=>r.department==='Marketing'&&r.no_ws===item.ws);
+  let savedQtyMap={};
+  if(parentEvt&&parentEvt.assy_qty_json){try{savedQtyMap=JSON.parse(parentEvt.assy_qty_json);}catch(e){}}
+  children.forEach(ch=>{
+    const chQty=(mktAssyQtyData&&mktAssyQtyData[ch]!=null)?mktAssyQtyData[ch]
+                :(savedQtyMap[ch]!=null?savedQtyMap[ch]:(item.qty||1));
+    expanded.push({ws:ch,customer:item.customer,part:item.part,ws_type:'CHILD',no_po:item.no_po,deadline:item.deadline,isChild:true,childQty:chQty});});}
 });
 if(!expanded.length){showToast('Tidak ada WS untuk diprint.','warn');return;}
 /* Build items data with mkt info */
-const allEvs=evs();
 const itemsData=expanded.map(item=>{
   const isChild=item.isChild||/^.+-\d+$/.test(item.ws);
   const parentWs=isChild?item.ws.replace(/-\d+$/,''):item.ws;
@@ -6132,7 +6201,9 @@ const itemsData=expanded.map(item=>{
   const partName=(mkt?.part)||item.part||'—';
   const deadline=(mkt?.deadline)||item.deadline||'';
   const isExp=deadline&&(new Date()>new Date(deadline+' 23:59:59'));
-  return {ws:item.ws,customer,noPo,partName,deadline,isExp,badgeText,badgeColor,qty:(mkt?.qty||item.qty||'—')};
+  /* Qty: child uses childQty (per-child from WS List), parent uses mkt.qty */
+  const qty=isChild?(item.childQty!=null?item.childQty:'—'):(mkt?.qty||item.qty||'—');
+  return {ws:item.ws,customer,noPo,partName,deadline,isExp,badgeText,badgeColor,qty,isChild};
 });
 const itemsJson=JSON.stringify(itemsData);
 const w=window.open('','_blank');
