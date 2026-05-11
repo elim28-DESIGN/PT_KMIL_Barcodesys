@@ -10,7 +10,7 @@
 <meta name="description" content="PT KMIL — Multi-Division Work Order System">
 <!-- Apple touch icon (inline SVG→PNG via canvas not needed, use emoji fallback) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307060f'/%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b5cf6'/%3E%3Cstop offset='1' stop-color='%236d28d9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='50' y='66' text-anchor='middle' font-size='44' font-family='Arial Black,Arial' font-weight='900' fill='white'%3EKM%3C/text%3E%3C/svg%3E">
-<title>PT KMIL — ERP System V45.2</title>
+<title>PT KMIL — ERP System V45.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script><style>
@@ -703,23 +703,24 @@ select option{background:var(--inp)}
 .top-clock{font-family:var(--mono);font-size:10px;color:var(--muted);padding:3px 9px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);letter-spacing:.3px}
 
 /* ── DASHBOARD ── */
+/* V45.3 — formal Inter font for dashboard readability */
 .dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
 .dash-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);padding:13px;position:relative;overflow:hidden;transition:border-color .15s,transform .1s;border-left:2px solid var(--ds-color,var(--border))}
 .dash-stat:hover{border-color:var(--ds-color,var(--border2));transform:translateY(-1px)}
 .dash-stat::before{content:'';position:absolute;inset:0;background:color-mix(in srgb,var(--ds-color,var(--border)) 5%,transparent);pointer-events:none}
-.ds-label{font-size:8px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-.ds-val{font-size:26px;font-weight:700;font-family:var(--mono);line-height:1;color:var(--ds-color,var(--text))}
-.ds-sub{font-size:9px;color:var(--muted);margin-top:3px}
+.ds-label{font-size:9px;font-family:'Inter','Segoe UI',sans-serif;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:5px}
+.ds-val{font-size:28px;font-weight:800;font-family:'Inter','Segoe UI',sans-serif;line-height:1;color:var(--ds-color,var(--text))}
+.ds-sub{font-size:10px;font-family:'Inter','Segoe UI',sans-serif;font-weight:500;color:var(--muted);margin-top:3px}
 .ds-icon{position:absolute;right:10px;top:10px;font-size:18px;opacity:.3}
 .dash-recent{background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);overflow:hidden;margin-bottom:10px}
-.dash-recent-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:8px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;justify-content:space-between}
-.dash-row{padding:7px 12px;border-bottom:1px solid var(--border);font-size:10px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .1s}
+.dash-recent-hd{padding:9px 12px;border-bottom:1px solid var(--border);font-size:9px;font-family:'Inter','Segoe UI',sans-serif;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;justify-content:space-between}
+.dash-row{padding:8px 12px;border-bottom:1px solid var(--border);font-size:11px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .1s;font-family:'Inter','Segoe UI',sans-serif}
 .dash-row:last-child{border-bottom:none}
 .dash-row:hover{background:var(--card)}
-.dash-ws-no{font-family:var(--mono);font-weight:700;font-size:10px;min-width:100px}
+.dash-ws-no{font-family:'Inter','Segoe UI',sans-serif;font-weight:800;font-size:12px;min-width:100px;color:var(--text)}
 .dash-dept-dot{width:5px;height:5px;flex-shrink:0}
-.dash-row-meta{flex:1;color:var(--muted);font-size:9px}
-.deadline-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--err-bg);border:1px solid var(--err-bd);border-radius:var(--r);margin-bottom:5px;font-size:10px}
+.dash-row-meta{flex:1;color:var(--muted);font-size:10px;font-family:'Inter','Segoe UI',sans-serif}
+.deadline-row{display:flex;align-items:center;gap:8px;padding:7px 11px;background:var(--err-bg);border:1px solid var(--err-bd);border-radius:var(--r);margin-bottom:5px;font-size:11px;font-family:'Inter','Segoe UI',sans-serif}
 .sb-ws-count{font-size:8px;font-family:var(--mono);padding:1px 5px;border-radius:var(--r);background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)}
 
 /* ── FOCUS + ACCESSIBILITY ── */
@@ -4406,7 +4407,7 @@ function setWv(id,val,required){const el=document.getElementById(id);
 if(!el) return;
 if(!val){el.innerHTML='<span class="empty">— KOSONG —</span>';} else {el.textContent=val;
 if(id==='wv-deadline'&&val&&isExpired(val)){el.style.color='#fca5a5';
-el.textContent=val+' ⚠️ EXPIRED!';} else {el.style.color='';}}}
+el.textContent=fmtDeadline(val)+' ⚠️ EXPIRED!';} else {el.style.color='';el.textContent=val?fmtDeadline(val):val;}}}
 setWv('wv-customer',customer,true);
 setWv('wv-nows',noWs,true);
 setWv('wv-nopo',noPo,true);
@@ -4456,7 +4457,34 @@ return v==='__C__'?($i('mkt-cust-custom-assy')?.value.trim()||''):v;}
 const v=$i('mkt-customer')?.value||'';
 return v==='__C__'?($i('mkt-cust-custom')?.value.trim()||''):v;}
 function checkDeadline(){const d=$i('mkt-deadline').value;$i('mkt-dl-warn').style.display=d&&new Date()>new Date(d+' 23:59:59')?'block':'none';}
-function isExpired(d){return d&&new Date()>new Date(d+' 23:59:59');}
+/* ── V45.3: Normalise deadline to YYYY-MM-DD (handles ISO datetime from Sheets) ── */
+function normDeadline(d){
+  if(!d) return '';
+  var s=String(d).trim();
+  /* ISO datetime: "2026-05-27T17:00:00.000Z" or "2026-05-27T17:00:00" */
+  if(s.indexOf('T')>-1){
+    var dt=new Date(s);
+    if(!isNaN(dt)){
+      return dt.toISOString().slice(0,10);
+    }
+  }
+  /* date-only: "2026-05-27" – already correct */
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  /* Try parsing anything else */
+  var dt2=new Date(s);
+  if(!isNaN(dt2)) return dt2.toISOString().slice(0,10);
+  return s;
+}
+/* Format deadline as Indonesian "Senin, 27 Mei 2026" — no time, no ISO noise */
+function fmtDeadline(d){
+  if(!d) return '—';
+  var nd=normDeadline(d);
+  if(!nd||nd==='—') return d||'—';
+  var dt=new Date(nd+'T00:00:00');
+  if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function isExpired(d){if(!d) return false; var nd=normDeadline(d); return nd&&new Date()>new Date(nd+' 23:59:59');}
 function showQtyWarn(warnId, val){const el=document.getElementById(warnId);
 if(!el) return;
 el.style.display = (val!==''&&val!==null) ? 'block' : 'none';
@@ -4692,19 +4720,33 @@ mats.forEach((m,idx)=>{const matName=m.material==='CUSTOM...'?(m.mat_custom||'Cu
 const itemName=m.name||matName;
 const dia=m.dia?`Ø${m.dia}mm · `:'';const dim=`${dia}${m.len||'?'}×${m.wid||'?'}×${m.thk||'?'}mm`;
 const row=document.createElement('div');
-row.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border:1px solid var(--border2);border-radius:6px;flex-wrap:wrap;';
+row.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border2);border-radius:6px;flex-wrap:wrap;';
+/* V45.3 — formal, bold, dark-text labels */
+const stockColor=m.mat_source==='ORDER'?'#b45309':'#15803d';
+const stockBg=m.mat_source==='ORDER'?'#fef3c7':'#dcfce7';
 row.innerHTML=`
-<div style="width:22px;height:22px;border-radius:4px;background:color-mix(in srgb,var(--prd) 20%,transparent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--prd);flex-shrink:0">${idx+1}</div>
+<div style="width:24px;height:24px;border-radius:4px;background:color-mix(in srgb,var(--prd) 20%,transparent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--prd);flex-shrink:0">${idx+1}</div>
 <div style="flex:1;min-width:120px">
-<div style="font-size:12px;font-weight:600">${itemName} <span style="font-size:9px;color:var(--muted)">(${m.item_type||'SINGLE'} · ${m.place_process||'—'})</span></div>
-<div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${matName} · ${dim} · Qty: ${m.qty||1} · ${m.mat_source||'STOCK'}${m.harden==='YES'?' · Harden '+m.hrc+'HRC':''}</div>
+  <div style="font-family:'Inter','Segoe UI',sans-serif;font-size:13px;font-weight:800;color:#111;margin-bottom:2px;letter-spacing:.1px">
+    ${itemName}
+    <span style="font-size:10px;font-weight:500;color:#555;margin-left:4px">(${m.item_type||'SINGLE'} · ${m.place_process||'—'})</span>
+  </div>
+  <div style="font-family:'Inter','Segoe UI',sans-serif;font-size:11px;color:#444;font-weight:600">
+    ${matName} &nbsp;·&nbsp; <span style="font-weight:700;color:#111">${dim}</span> &nbsp;·&nbsp; Qty: <b style="color:#111">${m.qty||1}</b>
+  </div>
 </div>
-<div style="display:flex;gap:4px;flex-wrap:wrap">
-<span style="padding:2px 8px;border-radius:8px;font-size:9px;font-family:var(--mono);font-weight:700;background:color-mix(in srgb,${m.mat_source==='STOCK'?'#10b981':'#f59e0b'} 15%,transparent);color:${m.mat_source==='STOCK'?'#4ade80':'#fbbf24'};border:1px solid color-mix(in srgb,${m.mat_source==='STOCK'?'#10b981':'#f59e0b'} 30%,transparent)">${m.mat_source||'STOCK'}</span>
-${m.harden==='YES'?`<span style="padding:2px 8px;border-radius:8px;font-size:9px;font-family:var(--mono);font-weight:700;background:color-mix(in srgb,#ef4444 15%,transparent);color:#fca5a5;border:1px solid color-mix(in srgb,#ef4444 30%,transparent)">HARDEN ${m.hrc}HRC</span>`:''}
+<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+<span style="padding:3px 12px;border-radius:4px;font-size:11px;font-family:'Inter','Segoe UI',sans-serif;font-weight:800;background:${stockBg};color:${stockColor};border:1.5px solid ${stockColor}4a;letter-spacing:.3px">${m.mat_source||'STOCK'}</span>
+${m.harden==='YES'?`<span style="padding:3px 12px;border-radius:4px;font-size:11px;font-family:'Inter','Segoe UI',sans-serif;font-weight:800;background:#fee2e2;color:#b91c1c;border:1.5px solid #fca5a5;letter-spacing:.3px">HARDEN ${m.hrc||''}HRC</span>`:''}
 </div>`;
 container.appendChild(row);});}
-function renderQcBulkItems(ws){const mats=getMatsForWs(ws);
+function renderQcBulkItems(ws){
+/* V45.3: also check parent WS so child-WS scans show material list */
+let mats=getMatsForWs(ws);
+if(!mats.length){
+  const baseWs=ws.replace(/-\d+$/,'');
+  if(baseWs!==ws) mats=getMatsForWs(baseWs);
+}
 const c=$i('qcBulkItems');
 if(!mats.length){c.innerHTML=`<div style="padding:14px;text-align:center;font-size:11px;color:var(--faint)">Tidak ada material list PPIC untuk WS <strong>${ws}</strong>.<br><span style="font-size:10px;color:var(--muted)">PPIC perlu simpan list material terlebih dahulu.</span></div>`;return;}
 c.innerHTML='';
@@ -4717,10 +4759,22 @@ const currentQty=qcBulkStatus[m.id].qty;
 const item=document.createElement('div');item.className='qc-bulk-item';
 item.dataset.matId=m.id;
 item.dataset.totalQty=totalQty;
+/* V45.3 — formal bold typography, black-dominant text */
+const stockColor=m.mat_source==='ORDER'?'#b45309':'#15803d';
+const stockBg=m.mat_source==='ORDER'?'#fef3c7':'#dcfce7';
+const hardenBadge=m.harden==='YES'?`<span style="padding:2px 10px;border-radius:4px;font-size:11px;font-family:'Inter','Segoe UI',sans-serif;font-weight:800;background:#fee2e2;color:#b91c1c;border:1.5px solid #fca5a5;letter-spacing:.3px">HARDEN ${m.hrc||''}HRC</span>`:'';
 item.innerHTML=`
-<div class="qc-item-info">
-<div class="qc-item-name">${matName} <span style="font-size:9px;color:var(--muted)">(${m.item_type||'SINGLE'} · ${m.place_process||'—'})</span></div>
-<div class="qc-item-dim">${dim} · ${m.mat_source||'STOCK'}${m.harden==='YES'?' · Harden '+m.hrc+'HRC':''}</div>
+<div class="qc-item-info" style="flex:1">
+  <div style="font-family:'Inter','Segoe UI',sans-serif;font-size:13px;font-weight:800;color:#111;margin-bottom:3px;letter-spacing:.1px">
+    ${matName}
+    <span style="font-size:10px;color:#555;font-weight:500;margin-left:4px">(${m.item_type||'SINGLE'} · ${m.place_process||'—'})</span>
+  </div>
+  <div style="font-family:'Inter','Segoe UI',sans-serif;font-size:11px;color:#444;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+    <span style="font-weight:700;color:#111">${dim}</span>
+    <span style="padding:1px 9px;border-radius:4px;font-size:11px;font-weight:800;background:${stockBg};color:${stockColor};border:1.5px solid ${stockColor}4a;font-family:'Inter','Segoe UI',sans-serif;letter-spacing:.3px">${m.mat_source||'STOCK'}</span>
+    ${hardenBadge}
+    <span style="font-weight:600;color:#333">Qty: <b style="color:#111">${totalQty}</b></span>
+  </div>
 </div>
 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
 <div style="display:flex;align-items:center;gap:4px;background:color-mix(in srgb,var(--qc) 10%,var(--card));border:1px solid color-mix(in srgb,var(--qc) 30%,transparent);border-radius:7px;padding:3px 8px">
@@ -4795,15 +4849,25 @@ const item=(btn && typeof btn.closest==='function') ? btn.closest('.qc-bulk-item
 item.querySelectorAll('.qc-s-btn').forEach(b=>{b.className=b.className.replace(/ (incoming|ok|repair|reject|special)/g,'');});
 btn.classList.add(status);}
 function setQcSQty(id,val){if(!qcBulkStatus[id]) qcBulkStatus[id]={};qcBulkStatus[id].qty=Number(val);}
-function getQcBulkSummary(ws){const mats=getMatsForWs(ws);
+function getQcBulkSummary(ws){
+/* V45.3: also check parent WS */
+let mats=getMatsForWs(ws);
+if(!mats.length){const baseWs=ws.replace(/-\d+$/,'');if(baseWs!==ws)mats=getMatsForWs(baseWs);}
 return mats.map(m=>{const s=qcBulkStatus[m.id]||{};const qty=s.qty!==undefined?s.qty:(m.qty||1);const totalQty=m.qty||1;const parsial=qty<totalQty?`[PARSIAL ${qty}/${totalQty}]`:'';return `${m.name||m.id}:${s.status||'pending'}:${qty}${parsial}`;}).join('|');
 }
-function autoFillSTFromPpic(ws){const mats=getMatsForWs(ws);
+function autoFillSTFromPpic(ws){
+/* V45.3: also look up parent WS so child-WS scans get materials too */
+let mats=getMatsForWs(ws);
+if(!mats.length){
+  const baseWs=ws.replace(/-\d+$/,'');
+  if(baseWs!==ws) mats=getMatsForWs(baseWs);
+}
 if(!mats.length) return;
 const today=new Date().toISOString().slice(0,10);
 const newRows=[];
 mats.forEach(m=>{const name=m.name||'';
-if(/\d{7,}-\d+/.test(name)||name===ws){const already=stRows.find(r=>r.ws===name);
+/* Match child-WS pattern (e.g. 26020013-01) OR exact WS */
+if(/\d{6,}-\d+/.test(name)||name===ws||name===ws.replace(/-\d+$/,'')){const already=stRows.find(r=>r.ws===name);
 if(!already) newRows.push({ws:name,date:today,qty:m.qty||1,status:'PARSIAL',ts:new Date().toISOString()});}});
 if(newRows.length){stRows=[...stRows,...newRows];
 renderSTList();
@@ -4982,7 +5046,7 @@ data.innerHTML=`
 <div class="sfield"><label>Customer</label><span>${customer}</span></div>
 <div class="sfield"><label>NO_PO</label><span>${noPo}</span></div>
 <div class="sfield"><label>Part</label><span>${part}</span></div>
-<div class="sfield"><label>Deadline</label><span ${exp?'style="color:#f87171;font-weight:700"':''}>${deadline||'—'}</span></div>
+<div class="sfield"><label>Deadline</label><span ${exp?'style="color:#f87171;font-weight:700"':''}>${fmtDeadline(deadline)}</span></div>
 <div class="sfield"><label>Qty</label><span>${mkt.qty||'—'}</span></div>
 `;
 if(exp){const w=document.createElement('div');w.className='scan-deadline-warn';w.textContent='🚨 DEADLINE EXPIRED — WS terlambat!';data.appendChild(w);}
@@ -5038,7 +5102,7 @@ const events=evs();
 let html='<table style="width:100%;border-collapse:collapse;font-size:10px"><tr style="background:var(--border)"><th style="padding:4px 7px;text-align:left">WS</th><th style="padding:4px 7px;text-align:left">Customer</th><th style="padding:4px 7px;text-align:left">Deadline</th><th style="padding:4px 7px;text-align:left">Found</th></tr>';
 lines.forEach(ws=>{const mkt=events.find(r=>r.no_ws===ws&&r.department==='Marketing')||events.find(r=>r.no_ws===ws);
 const exp=mkt&&isExpired(mkt.deadline||'');
-html+=mkt?`<tr><td style="padding:4px 7px;font-family:var(--mono)">${ws}</td><td style="padding:4px 7px">${mkt.customer||'—'}</td><td style="padding:4px 7px;${exp?'color:#f87171;font-weight:700':''}">${mkt.deadline||'—'}${exp?' 🚨':''}</td><td style="padding:4px 7px;color:#4ade80">✓</td></tr>`:`<tr><td style="padding:4px 7px;font-family:var(--mono)">${ws}</td><td colspan="2" style="padding:4px 7px;color:var(--muted)">—</td><td style="padding:4px 7px;color:#f87171">✗</td></tr>`;
+html+=mkt?`<tr><td style="padding:4px 7px;font-family:var(--mono)">${ws}</td><td style="padding:4px 7px">${mkt.customer||'—'}</td><td style="padding:4px 7px;${exp?'color:#f87171;font-weight:700':''}">${fmtDeadline(mkt.deadline)||'—'}${exp?' 🚨':''}</td><td style="padding:4px 7px;color:#4ade80">✓</td></tr>`:`<tr><td style="padding:4px 7px;font-family:var(--mono)">${ws}</td><td colspan="2" style="padding:4px 7px;color:var(--muted)">—</td><td style="padding:4px 7px;color:#f87171">✗</td></tr>`;
 });
 $i('massResults').innerHTML=html+'</table>';}
 function getPayload(dept){const d=dept||activeDept;
@@ -5963,7 +6027,7 @@ div.innerHTML=`
 <div class="tl-ev">${r.event}</div>
 <div class="tl-meta">WS: ${r.no_ws||'—'} · ${new Date(r.ts).toLocaleString('id-ID')}</div>
 <div class="tl-meta">Cust: ${r.customer||'—'} · User: ${r.user||'—'}</div>
-${r.deadline?`<div class="tl-meta">Deadline: <span ${exp?'style="color:#f87171;font-weight:700"':''}>${r.deadline}${exp?' 🚨':''}</span></div>`:''}
+${r.deadline?`<div class="tl-meta">Deadline: <span ${exp?'style="color:#f87171;font-weight:700"':''}>${fmtDeadline(r.deadline)}${exp?' 🚨':''}</span></div>`:''}
 ${r.remarks?`<div class="tl-meta" style="font-style:italic">${r.remarks}</div>`:''}
 ${r.assy_parts&&r.assy_parts.length?`<div class="tl-meta" style="color:#a78bfa;font-size:9px">🔧 ${r.assy_parts.length} parts: ${r.assy_parts.slice(0,3).map(p=>p.ws||p.partName||'?').join(', ')}${r.assy_parts.length>3?'...':''}</div>`:''}
 <div style="margin-top:2px"><span class="tl-badge">${r.status}</span>${revTag}${opTag}${assyTag}${redTag}</div>`;
@@ -5984,9 +6048,9 @@ function printQR(){
   const partName=mkt?.part||'—';
   const deadline=mkt?.deadline||'';
   const qty=mkt?.qty||'—';
-  const isExpiredDl=deadline&&(new Date()>new Date(deadline+' 23:59:59'));
+  const isExpiredDl=isExpired(deadline);
   const dlColor=isExpiredDl?'color:#cc0000;font-weight:700':'';
-  const dlText=deadline?(isExpiredDl?deadline+' ⚠ EXPIRED':deadline):'—';
+  const dlText=deadline?(isExpiredDl?fmtDeadline(deadline)+' ⚠ EXPIRED':fmtDeadline(deadline)):'—';
   /* WS type badge */
   const wsType=mkt?.ws_type||'';
   const isChildWsRx=/^.+-\d+$/.test(ws);
@@ -6133,9 +6197,9 @@ function _buildQrPrintHTML(ws, area, mktData, isChild, childrenList){
   const partName=(mktData?.part)||'—';
   const deadline=(mktData?.deadline)||'';
   const qty=(mktData?.qty)||'—';
-  const isExpiredDl=deadline&&(new Date()>new Date(deadline+' 23:59:59'));
+  const isExpiredDl=isExpired(deadline);
   const dlColor=isExpiredDl?'color:#cc0000;font-weight:700':'';
-  const dlText=deadline?(isExpiredDl?deadline+' ⚠ EXPIRED':deadline):'—';
+  const dlText=deadline?(isExpiredDl?fmtDeadline(deadline)+' ⚠ EXPIRED':fmtDeadline(deadline)):'—';
   const wsType=(mktData?.ws_type)||'';
   let badgeText='SINGLE PART';let badgeColor='#1d4ed8';
   if(isChild){badgeText='CHILD WS';badgeColor='#7c3aed';}
@@ -6221,7 +6285,7 @@ const itemsData=expanded.map(item=>{
   const noPo=(mkt?.no_po)||item.no_po||'—';
   const partName=(mkt?.part)||item.part||'—';
   const deadline=(mkt?.deadline)||item.deadline||'';
-  const isExp=deadline&&(new Date()>new Date(deadline+' 23:59:59'));
+  const isExp=deadline&&isExpired(deadline);
   /* Qty: child uses childQty (per-child from WS List), parent uses mkt.qty */
   const qty=isChild?(item.childQty!=null?item.childQty:'—'):(mkt?.qty||item.qty||'—');
   return {ws:item.ws,customer,noPo,partName,deadline,isExp,badgeText,badgeColor,qty,isChild};
@@ -6263,7 +6327,7 @@ items.forEach(item=>{
   card.appendChild(wsEl);
   const tbl=document.createElement('table');
   const dlStyle=item.isExp?'class="exp"':'';
-  const dlText=item.deadline?(item.isExp?item.deadline+' ⚠':item.deadline):'—';
+  const dlText=item.deadline?(item.isExp?fmtDeadline(item.deadline)+' ⚠':fmtDeadline(item.deadline)):'—';
   tbl.innerHTML='<tr><td>Customer</td><td><b>'+item.customer+'</b></td></tr>'
     +'<tr><td>NO_PO</td><td>'+item.noPo+'</td></tr>'
     +'<tr><td>Part</td><td>'+item.partName+'</td></tr>'
@@ -6389,7 +6453,7 @@ card.innerHTML=`
 <div style="flex:1">
 <div class="ws-card-no">📦 ${wsStr}${isChildWs?`<span style="font-size:9px;margin-left:6px;padding:1px 7px;border-radius:8px;background:color-mix(in srgb,#8b5cf6 18%,transparent);color:#a78bfa;font-family:var(--mono);border:1px solid color-mix(in srgb,#8b5cf6 35%,transparent)">child of ${parentWs}</span>`:''}${hasDr?' 📐':''} ${exp?'<span style="color:#ef4444;font-size:10px">🚨 EXPIRED</span>':''}</div>
 <div class="ws-card-info">Cust: ${metaSrc.customer||'—'} · PO: ${metaSrc.no_po||'—'} · Part: ${metaSrc.part||'—'}</div>
-${deadline?`<div class="ws-card-info" ${exp?'style="color:#f87171;font-weight:700"':''}>Deadline: ${deadline}</div>`:''}
+${deadline?`<div class="ws-card-info" ${exp?'style="color:#f87171;font-weight:700"':''}>Deadline: ${fmtDeadline(deadline)}</div>`:''}
 <div class="ws-card-info">Events: ${wEvs.length}${isChildWs&&parentEvs.length?` · Parent events: ${parentEvs.length}`:''} · Status: <b style="color:#4ade80">${last.status||'—'}</b></div>
 </div>
 <div style="display:flex;gap:5px;align-items:center">
@@ -6421,7 +6485,7 @@ ${(()=>{
 ${wEvs.length===0&&isChildWs?`<div style="padding:8px 12px;font-size:10px;color:var(--muted);font-style:italic;border-bottom:1px solid var(--border)">⚠️ Belum ada event khusus untuk child WS ini. Menampilkan event parent (${parentWs}):</div>`:''}
 ${wEvs.length===0&&!isChildWs?`<div style="padding:10px 12px;font-size:10px;color:var(--faint);text-align:center">Belum ada event tersimpan untuk WS ini.</div>`:''}
 ${(wEvs.length?wEvs:isChildWs?parentEvs:[]).map(r=>{const isWarn=WARN_EVENTS.includes(r.event),isRed=RED_EVENTS.includes(r.event);
-const evExp=deadline&&new Date(r.ts)>new Date(deadline+' 23:59:59');
+const evExp=deadline&&new Date(r.ts)>new Date(normDeadline(deadline)+' 23:59:59');
 return `<div class="ev-row" ${isRed?'style="background:color-mix(in srgb,#ef4444 8%,transparent)"':isWarn?'style="background:color-mix(in srgb,#fb923c 5%,transparent)"':''}>
 <div class="ev-dept" style="color:${DC[r.department]||'#6b7280'}">${r.department} — ${r.event}${r.revisi?' (Rev '+r.revisi+')':''}</div>
 <div class="ev-meta">${new Date(r.ts).toLocaleString('id-ID')} · ${r.user||'—'} · ${r.status}</div>
@@ -6452,11 +6516,11 @@ pt.innerHTML=`<div style="font-family:Arial;padding:20px;color:#111">
 <div style="border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start">
 <div><h1 style="font-size:16px;margin:0">PT KMIL — Work Order Event Log</h1><p style="font-size:10px;margin:2px 0 0;color:#666">Print: ${new Date().toLocaleString('id-ID')}</p></div>${thumbHTML}
 </div>
-${exp?`<div style="background:#fef2f2;border-left:4px solid #dc2626;padding:8px 12px;margin-bottom:12px;font-weight:700;color:#dc2626;font-size:12px">🚨 DEADLINE PO KADALUARSA! Deadline: ${deadline}</div>`:''}
+${exp?`<div style="background:#fef2f2;border-left:4px solid #dc2626;padding:8px 12px;margin-bottom:12px;font-weight:700;color:#dc2626;font-size:12px">🚨 DEADLINE PO KADALUARSA! Deadline: ${fmtDeadline(deadline)}</div>`:''}
 <table style="width:100%;font-size:11px;margin-bottom:10px;border-collapse:collapse">
 <tr><td style="color:#666;width:110px;padding:2px 0">NO_WS</td><td style="font-weight:700">${ws}</td><td style="color:#666;width:110px">Customer</td><td style="font-weight:700">${first.customer||'—'}</td></tr>
 <tr><td style="color:#666;padding:2px 0">NO_PO</td><td>${first.no_po||'—'}</td><td style="color:#666">Part</td><td>${first.part||'—'}</td></tr>
-<tr><td style="color:#666;padding:2px 0">WS Type</td><td>${first.ws_type||'—'}</td><td style="color:#666">Deadline PO</td><td ${exp?'style="color:#dc2626;font-weight:700"':''}>${deadline||'—'}${exp?' ⚠ EXPIRED':''}</td></tr>
+<tr><td style="color:#666;padding:2px 0">WS Type</td><td>${first.ws_type||'—'}</td><td style="color:#666">Deadline PO</td><td ${exp?'style="color:#dc2626;font-weight:700"':''}>${fmtDeadline(deadline)||'—'}${exp?' ⚠ EXPIRED':''}</td></tr>
 </table>
 ${matHTML}
 ${(()=>{
@@ -6500,7 +6564,7 @@ ${(()=>{
 <th style="padding:5px 6px;border:1px solid #ccc;text-align:left">User</th>
 <th style="padding:5px 6px;border:1px solid #ccc;text-align:left">Remarks</th>
 </tr></thead>
-<tbody>${wEvs.map((r,i)=>{const evExp=deadline&&new Date(r.ts)>new Date(deadline+' 23:59:59');
+<tbody>${wEvs.map((r,i)=>{const evExp=deadline&&new Date(r.ts)>new Date(normDeadline(deadline)+' 23:59:59');
 const isRed=RED_EVENTS.includes(r.event);
 const rowBg=evExp?'background:#fef2f2':isRed?'background:#fff1f1':i%2?'background:#f9f9f9':'';
 return `<tr style="${rowBg}">
@@ -6879,9 +6943,9 @@ const entries=[];
 mktRows.forEach(r=>{if(seenWs.has(r.no_ws)) return;
 seenWs.add(r.no_ws);
 if(custFilter&&r.customer!==custFilter) return;
-const dl=new Date(r.deadline+' 23:59:59');
-const now=new Date();
-const diffDays=Math.ceil((dl-now)/(1000*60*60*24));
+const dl=new Date(normDeadline(r.deadline)+' 23:59:59');
+const now2=new Date();
+const diffDays=Math.ceil((dl-now2)/(1000*60*60*24));
 entries.push({...r,diffDays});});
 entries.sort((a,b)=>a.diffDays-b.diffDays);
 if(!entries.length){alert('Tidak ada deadline untuk dicetak.');return;}
@@ -6893,7 +6957,7 @@ const rowsHTML=entries.map((r,i)=>`
 <td style="padding:5px 8px;border:1px solid #ddd">${r.customer||'—'}</td>
 <td style="padding:5px 8px;border:1px solid #ddd;font-size:10px">${(r.part||'—').slice(0,40)}</td>
 <td style="padding:5px 8px;border:1px solid #ddd;font-weight:700;color:${r.diffDays<0?'#dc2626':r.diffDays<=3?'#b45309':'#15803d'}">${r.diffDays<0?'EXPIRED '+Math.abs(r.diffDays)+'h lalu':r.diffDays+'h lagi'}</td>
-<td style="padding:5px 8px;border:1px solid #ddd">${r.deadline||'—'}</td>
+<td style="padding:5px 8px;border:1px solid #ddd">${fmtDeadline(r.deadline)||'—'}</td>
 </tr>`).join('');
 const pt=document.getElementById('printTarget');
 pt.innerHTML=`<div style="font-family:Arial;padding:20px;color:#111;max-width:800px">
@@ -7466,7 +7530,7 @@ const expiredWs=[];
 const seenWs=new Set();
 mktRows.forEach(r=>{if(seenWs.has(r.no_ws)) return;
 seenWs.add(r.no_ws);
-const dl=new Date(r.deadline+' 23:59:59');
+const dl=new Date(normDeadline(r.deadline)+' 23:59:59');
 const now2=new Date();
 const diffDays=Math.ceil((dl-now2)/(1000*60*60*24));
 if(diffDays<0) expiredWs.push({...r,diffDays});
@@ -7481,10 +7545,10 @@ if(typeof _dlSortMode!=='undefined'&&_dlSortMode==='desc'){all.sort((a,b)=>b.dif
 if(all.length){dlBox.style.display='block';
 dlEl.innerHTML=all.map(r=>`
 <div class="deadline-row">
-<span style="font-family:var(--mono);font-weight:700;font-size:11px">${r.no_ws}</span>
-<span style="font-size:10px;color:var(--muted)">${r.customer||'—'}</span>
-<span style="font-size:10px;margin-left:auto;font-family:var(--mono)" class="${r.diffDays<0?'deadline-expired':'deadline-soon'}">
-${r.diffDays<0?`Expired ${Math.abs(r.diffDays)}h lalu`:`${r.diffDays}h lagi`} · ${r.deadline}
+<span style="font-family:'Inter','Segoe UI',sans-serif;font-weight:800;font-size:12px">${r.no_ws}</span>
+<span style="font-size:11px;font-weight:600;color:var(--muted)">${r.customer||'—'}</span>
+<span style="font-size:11px;margin-left:auto;font-family:'Inter','Segoe UI',sans-serif;font-weight:700" class="${r.diffDays<0?'deadline-expired':'deadline-soon'}">
+${r.diffDays<0?`🚨 Expired ${Math.abs(r.diffDays)}h lalu`:`⏰ ${r.diffDays}h lagi`} — <b>${fmtDeadline(r.deadline)}</b>
 </span>
 </div>`).join('');} else {dlBox.style.display=expiredWs.length||soonWs.length?'block':'none';
 if(expiredWs.length||soonWs.length) dlEl.innerHTML='<div style="padding:10px;text-align:center;color:var(--faint);font-size:11px">Tidak ada deadline untuk customer ini.</div>';
@@ -7495,7 +7559,7 @@ if(dpBox&&dpList&&dashSortMode!=='none'){const wsMap={};
 rows.filter(r=>r.department==='Marketing').forEach(r=>{if(!wsMap[r.no_ws]) wsMap[r.no_ws]={ws:r.no_ws,customer:r.customer||'—',deadline:r.deadline||'',part:r.part||'—'};
 });
 let wsList=Object.values(wsMap).filter(w=>w.deadline);
-wsList.sort((a,b)=>{const da=new Date(a.deadline+' 23:59:59'),db=new Date(b.deadline+' 23:59:59');
+wsList.sort((a,b)=>{const da=new Date(normDeadline(a.deadline)+' 23:59:59'),db=new Date(normDeadline(b.deadline)+' 23:59:59');
 return dashSortMode==='asc'?da-db:db-da;});
 const noDeadline=Object.values(wsMap).filter(w=>!w.deadline);
 wsList=[...wsList,...noDeadline];
@@ -7508,7 +7572,8 @@ const pct=Math.round(doneCount/pipeline.length*100);
 const dl=w.deadline;
 const exp=dl&&isExpired(dl);
 const now3=new Date();
-const diffD=dl?Math.ceil((new Date(dl+' 23:59:59')-now3)/(1000*60*60*24)):null;
+const ndl=dl?normDeadline(dl):'';
+const diffD=ndl?Math.ceil((new Date(ndl+' 23:59:59')-now3)/(1000*60*60*24)):null;
 const dlColor=exp?'#ef4444':diffD!==null&&diffD<=3?'#fbbf24':'#4ade80';
 const barColor=pct===100?'#10b981':pct>=60?'#3b82f6':pct>=30?'#f59e0b':'#ef4444';
 return `<div style="padding:8px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer" onclick="jumpToWs('${w.ws}')">
@@ -7541,10 +7606,10 @@ recentEl.innerHTML=recent.map(r=>`
 <div class="dash-dept-dot" style="background:${deptColors[r.department]||'#6b7280'}"></div>
 <div class="dash-ws-no">${r.no_ws||'—'}</div>
 <div class="dash-row-meta">
-<span style="font-weight:600;color:var(--text)">${r.event||'—'}</span> · ${r.customer||'—'}<br>
-<span>${new Date(r.ts).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+<span style="font-weight:700;color:var(--text);font-family:'Inter','Segoe UI',sans-serif">${r.event||'—'}</span> · <span style="font-weight:600">${r.customer||'—'}</span><br>
+<span style="font-size:9px">${new Date(r.ts).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
 </div>
-<div style="font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:5px;background:var(--card);border:1px solid var(--border2);color:var(--muted)">${r.department}</div>
+<div style="font-size:9px;font-family:'Inter','Segoe UI',sans-serif;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--card);border:1px solid var(--border2);color:var(--muted)">${r.department}</div>
 </div>`).join('');}}
 const deptSumEl=document.getElementById('dashDeptSummary');
 if(deptSumEl){const depts2=['Marketing','Engineering','PPIC','Purchasing','Production','QC','Accounting'];
@@ -7645,7 +7710,7 @@ const delivered=wsList.filter(w=>w.delivered).length;
 const withDeadline=wsList.filter(w=>w.deadline);
 const overdue=withDeadline.filter(w=>!w.delivered&&isExpired(w.deadline)).length;
 const atRisk=withDeadline.filter(w=>{if(w.delivered||isExpired(w.deadline)) return false;
-const diff=Math.ceil((new Date(w.deadline+' 23:59:59')-now)/(1000*60*60*24));
+const diff=Math.ceil((new Date(normDeadline(w.deadline)+' 23:59:59')-now)/(1000*60*60*24));
 return diff<=3;}).length;
 const onTrack=withDeadline.length-overdue-atRisk;
 const rejectCount=rows.filter(r=>r.event==='Reject / NG').length;
@@ -7706,14 +7771,14 @@ return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
 <div style="font-size:10px;font-family:var(--mono);color:${deptColors[d]||'var(--muted)'};width:44px;text-align:right;font-weight:700">${pipelineCounts[d]}/${total}</div>
 </div>`;}).join('');}
 if(custFilter) wsList=wsList.filter(w=>w.customer===custFilter);
-if(statusFilter==='on_track') wsList=wsList.filter(w=>!w.delivered&&w.deadline&&!isExpired(w.deadline)&&Math.ceil((new Date(w.deadline+' 23:59:59')-now)/(1000*60*60*24))>3);
-if(statusFilter==='at_risk') wsList=wsList.filter(w=>{if(w.delivered||isExpired(w.deadline)) return false;const d=Math.ceil((new Date(w.deadline+' 23:59:59')-now)/(1000*60*60*24));return d<=3;});
+if(statusFilter==='on_track') wsList=wsList.filter(w=>!w.delivered&&w.deadline&&!isExpired(w.deadline)&&Math.ceil((new Date(normDeadline(w.deadline)+' 23:59:59')-now)/(1000*60*60*24))>3);
+if(statusFilter==='at_risk') wsList=wsList.filter(w=>{if(w.delivered||isExpired(w.deadline)) return false;const d=Math.ceil((new Date(normDeadline(w.deadline)+' 23:59:59')-now)/(1000*60*60*24));return d<=3;});
 if(statusFilter==='overdue') wsList=wsList.filter(w=>!w.delivered&&isExpired(w.deadline));
 if(statusFilter==='delivered') wsList=wsList.filter(w=>w.delivered);
 if(deptFilter) wsList=wsList.filter(w=>w.lastDept===deptFilter);
 wsList.sort((a,b)=>{if(!a.deadline&&!b.deadline) return 0;
 if(!a.deadline) return 1; if(!b.deadline) return -1;
-return new Date(a.deadline)-new Date(b.deadline);});
+return new Date(normDeadline(a.deadline))-new Date(normDeadline(b.deadline));});
 const tbody=document.getElementById('coo-ws-tbody');
 if(tbody){
 if(!wsList.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--faint)">Tidak ada WS</td></tr>`;
@@ -7721,7 +7786,8 @@ if(!wsList.length){tbody.innerHTML=`<tr><td colspan="10" style="text-align:cente
 const doneCount=pipeline.filter(d=>done.has(d)).length;
 const pct=Math.round(doneCount/pipeline.length*100);
 const dl=w.deadline;
-const diffD=dl?Math.ceil((new Date(dl+' 23:59:59')-now)/(1000*60*60*24)):null;
+const ndl2=dl?normDeadline(dl):'';
+const diffD=ndl2?Math.ceil((new Date(ndl2+' 23:59:59')-now)/(1000*60*60*24)):null;
 const isOD=dl&&isExpired(dl);
 const isAR=!isOD&&diffD!==null&&diffD<=3&&!w.delivered;
 const statusLabel=w.delivered?'<span style="color:#10b981;font-weight:700">✅ Delivered</span>':isOD?'<span style="color:#ef4444;font-weight:700">🔴 Overdue</span>':isAR?'<span style="color:#f97316;font-weight:700">⚠️ At Risk</span>':'<span style="color:#4ade80">✔ On Track</span>';
@@ -7732,7 +7798,7 @@ return `<tr>
 <td style="font-family:var(--mono);font-weight:700;font-size:11px">${w.ws}</td>
 <td style="font-size:11px">${w.customer||'—'}</td>
 <td style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${w.part}">${(w.part||'—').slice(0,35)}</td>
-<td style="font-family:var(--mono);font-size:11px;${isOD?'color:#f87171;font-weight:700':''}">${dl||'—'}</td>
+<td style="font-family:var(--mono);font-size:11px;${isOD?'color:#f87171;font-weight:700':''}">${fmtDeadline(dl)||'—'}</td>
 <td style="font-family:var(--mono);font-size:11px;text-align:center;${isOD?'color:#f87171;font-weight:700':isAR?'color:#fb923c;font-weight:700':''}">${w.delivered?'✓':dl?(isOD?'Overdue':diffD+'h'):'-'}</td>
 <td>${statusLabel}</td>
 <td><span style="font-size:10px;font-family:var(--mono);color:${stageColor}">${w.lastDept||'—'}</span></td>
@@ -7785,13 +7851,13 @@ if(r.event==='Customer - Delivered') w.delivered=true;
 if(r.event==='Reject / NG') w.hasReject=true;
 w.lastDept=r.department;});
 const now=new Date().toLocaleString('id-ID');
-const wsList=Object.values(wsMap).sort((a,b)=>{if(!a.deadline)return 1;if(!b.deadline)return -1;return new Date(a.deadline)-new Date(b.deadline);});
+const wsList=Object.values(wsMap).sort((a,b)=>{if(!a.deadline)return 1;if(!b.deadline)return -1;return new Date(normDeadline(a.deadline))-new Date(normDeadline(b.deadline));});
 const rowsHTML=wsList.map((w,i)=>{const isOD=w.deadline&&isExpired(w.deadline);
 return `<tr style="${i%2?'background:#f9f9f9':''}">
 <td style="padding:5px 8px;border:1px solid #ddd;font-family:monospace;font-weight:700">${w.ws}</td>
 <td style="padding:5px 8px;border:1px solid #ddd">${w.customer||'—'}</td>
 <td style="padding:5px 8px;border:1px solid #ddd;font-size:10px">${(w.part||'—').slice(0,40)}</td>
-<td style="padding:5px 8px;border:1px solid #ddd;${isOD?'color:#dc2626;font-weight:700':''}">${w.deadline||'—'}</td>
+<td style="padding:5px 8px;border:1px solid #ddd;${isOD?'color:#dc2626;font-weight:700':''}">${fmtDeadline(w.deadline)||'—'}</td>{w.deadline||'—'}</td>
 <td style="padding:5px 8px;border:1px solid #ddd">${w.delivered?'✅ Delivered':isOD?'🔴 Overdue':'▶ '+w.lastDept}</td>
 <td style="padding:5px 8px;border:1px solid #ddd;text-align:center">${w.hasReject?'⚠️':''}</td>
 </tr>`;}).join('');
@@ -7822,7 +7888,7 @@ const wsList=Object.values(wsMap);
 const headers=['no_ws','customer','part','deadline','status','last_dept','has_reject'];
 const lines=[headers.join(','),...wsList.map(w=>{const status=w.delivered?'Delivered':w.deadline&&isExpired(w.deadline)?'Overdue':'In Progress';
 return headers.map(h=>{
-const v={no_ws:w.ws,customer:w.customer,part:w.part,deadline:w.deadline,status,last_dept:w.lastDept,has_reject:w.hasReject?'Ya':'Tidak'}[h]||'';
+const v={no_ws:w.ws,customer:w.customer,part:w.part,deadline:fmtDeadline(w.deadline),status,last_dept:w.lastDept,has_reject:w.hasReject?'Ya':'Tidak'}[h]||'';
 return `"${String(v).replaceAll('"','""')}"`;}).join(',');})];
 const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8;'});
 const url=URL.createObjectURL(blob);
@@ -8467,9 +8533,67 @@ body:hover #v32-hud-bl,body:hover #v32-hud-br{
 /* ── Dash-recent row purple hover ── */
 .dash-row:hover{background:rgba(139,92,246,.06) !important}
 
-/* ── ws-card left border purple gradient ── */
-.ws-card{border-left:2px solid rgba(139,92,246,.3) !important}
-.ws-card:hover{border-left-color:rgba(139,92,246,.8) !important}
+/* ══════════════════════════════════════════════
+   V45.3 — Dashboard formal font & material list legibility
+   ══════════════════════════════════════════════ */
+
+/* Dashboard view — all text uses Inter for readability */
+#view-dashboard{font-family:'Inter','Segoe UI',system-ui,sans-serif}
+#view-dashboard h2,#view-dashboard h3{
+  font-family:'Inter','Segoe UI',sans-serif !important;
+  font-weight:700 !important;
+  letter-spacing:.3px !important;
+}
+/* Stat card labels: formal + bold */
+.ds-label{
+  font-family:'Inter','Segoe UI',sans-serif !important;
+  font-weight:700 !important;
+  font-size:9.5px !important;
+  letter-spacing:1px !important;
+}
+/* Stat card values: larger, bolder */
+.ds-val{
+  font-family:'Inter','Segoe UI',sans-serif !important;
+  font-weight:900 !important;
+  font-size:30px !important;
+}
+/* Stat sub-label */
+.ds-sub{
+  font-family:'Inter','Segoe UI',sans-serif !important;
+  font-weight:500 !important;
+  font-size:10px !important;
+}
+/* Deadline section heading */
+#dashDeadlineBox .dash-recent-hd,#dashDeadlineProgress .dash-recent-hd{
+  font-family:'Inter','Segoe UI',sans-serif !important;
+  font-weight:700 !important;
+  font-size:10px !important;
+}
+
+/* Material List dari PPIC — dark text for light mode too */
+body.light .qc-bulk-item .qc-item-info div:first-child,
+body.light .qc-item-name{
+  color:#111 !important;
+}
+body.light .qc-item-dim{
+  color:#444 !important;
+}
+
+/* Print: never show ISO timestamp in deadline — use formatted date only */
+@media print{
+  .deadline-iso{display:none !important}
+  .deadline-formatted{display:inline !important}
+}
+
+/* V45.3 Material List section title — bold formal */
+#prd-mat-panel h3,
+#qc-body h3{
+  font-family:'Inter','Segoe UI',sans-serif !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:.6px !important;
+  color:var(--text) !important;
+}
 </style>
 
 <!-- ════════════════════════════════════════════════════════
