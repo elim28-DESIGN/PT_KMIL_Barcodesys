@@ -5680,16 +5680,9 @@ window[cb]=data=>{cleanup();res(data);};
 document.body.appendChild(s);});}
 async function postToSheets(p){const cfg=JSON.parse(localStorage.getItem(CK)||'{}');
 if(!cfg.webAppUrl) throw new Error('Web App URL belum diisi di Settings.');
-const url=new URL(cfg.webAppUrl);
-url.searchParams.set('action','jsonp');
-url.searchParams.set('subAction','appendEvent');
-url.searchParams.set('payload',JSON.stringify({...p,drawing_thumbnail:''}));
-url.searchParams.set('callback','_kmilNoop');
-/* Fast fire-and-forget: no-cors fetch with keepalive avoids waiting for response */
-try{await fetch(url.toString(),{method:'GET',mode:'no-cors',keepalive:true});}
-catch(e){/* Fallback: JSONP for environments that block no-cors */
-const data=await jsonpCall(cfg.webAppUrl,{subAction:'appendEvent',payload:JSON.stringify({...p,drawing_thumbnail:''})});
-if(!data.ok) throw new Error(data.error||'Failed.');}
+/* FIX V42.2: pakai JSONP murni — no-cors fetch selalu ok:true meski data tidak masuk ke GAS */
+const data=await _jsonpRaw(cfg.webAppUrl,{subAction:'appendEvent',payload:JSON.stringify({...p,drawing_thumbnail:''})});
+if(!data.ok) throw new Error(data.error||'GAS gagal simpan event.');
 return {ok:true};}
 async function fetchFromSheets(){const cfg=JSON.parse(localStorage.getItem(CK)||'{}');
 if(!cfg.webAppUrl) throw new Error('Web App URL belum diisi di Settings ⚙️');
