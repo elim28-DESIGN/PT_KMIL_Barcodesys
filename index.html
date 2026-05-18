@@ -5698,7 +5698,7 @@ if(!data.ok) throw new Error(data.error||'Sheets request failed.');
 return (data.rows||[])
   .filter(r=>r&&typeof r==='object')
   .map(normalizeSheetRow)
-  .filter(r=>r&&r.ts&&r.no_ws);}
+  .filter(r=>r&&r.no_ws);/* FIX: jangan filter by ts — GAS V42.1 fallback ts ke new Date() */}
 /* ── NORMALIZE ROW FROM SHEETS (handles uppercase/mixed field names from GAS) ── */
 function normalizeSheetRow(r){
   if(!r||typeof r!=='object') return r;
@@ -5747,12 +5747,15 @@ function normalizeSheetRow(r){
    'drawing_filename','sj_filename'].forEach(k=>{
     if(n[k]!==undefined&&n[k]!==null) n[k]=String(n[k]).trim();
   });
+  /* FIX: fallback ts jika kosong supaya row tidak dibuang dan dedup konsisten */
+  if(!n.ts||n.ts==='') n.ts='1970-01-01T00:00:00.000Z';
   return n;
 }
 async function loadFromSheets(){try{const sheetRows=await fetchFromSheets();
 const localRows=evs();
-const sheetTsSet=new Set(sheetRows.map(r=>String(r.ts)));
-const localOnly=localRows.filter(r=>!sheetTsSet.has(String(r.ts)));
+/* FIX: dedup pakai composite key (no_ws+ts) — ts saja tidak cukup karena GAS bisa fallback ts tiap sync */
+const sheetKeySet=new Set(sheetRows.map(r=>String(r.no_ws)+'||'+String(r.ts)));
+const localOnly=localRows.filter(r=>!sheetKeySet.has(String(r.no_ws)+'||'+String(r.ts)));
 const merged=[...sheetRows,...localOnly].sort((a,b)=>new Date(a.ts)-new Date(b.ts));
 saveEvs(merged);
 renderTimeline();
