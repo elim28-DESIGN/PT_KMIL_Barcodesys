@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PT KMIL — WS Tracking</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+:root{
+  --bg:#0a0a0f;
+  --bg2:#111118;
+  --bg3:#1a1a24;
+  --border:#2a2a38;
+  --border2:#3a3a50;
+  --text:#e8e8f0;
+  --muted:#6b6b88;
+  --accent:#7c6aff;
+  --accent2:#a78bfa;
+  --green:#22c55e;
+  --yellow:#f59e0b;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --cyan:#06b6d4;
+  --pink:#ec4899;
+
+  --mkt:#a78bfa;
+  --eng:#60a5fa;
+  --ppic:#34d399;
+  --prc:#fb923c;
+  --qc:#f472b6;
+  --acc:#facc15;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Syne',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,10,15,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.brand-name{font-size:15px;font-weight:800;letter-spacing:-0.3px}
+.brand-sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.header-right{display:flex;align-items:center;gap:12px}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.sync-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.sync-dot.loading{background:var(--yellow);animation:spin-dot 1s linear infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes spin-dot{0%{transform:scale(1)}50%{transform:scale(0.4)}100%{transform:scale(1)}}
+
+.btn-refresh{
+  background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);padding:5px 12px;border-radius:6px;
+  font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;
+  transition:all .15s;
+}
+.btn-refresh:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── SEARCH & FILTER ── */
+.controls{
+  padding:16px 24px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:320px}
+.search-wrap input{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);padding:7px 12px 7px 32px;border-radius:8px;
+  font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;
+  transition:border-color .15s;
+}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:11px}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;
+  cursor:pointer;border:1px solid transparent;transition:all .15s;
+  font-family:'JetBrains Mono',monospace;
+}
+.chip.all{border-color:var(--border2);color:var(--muted)}
+.chip.all.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.mkt{border-color:var(--mkt);color:var(--mkt)}
+.chip.mkt.active{background:var(--mkt);color:#000}
+.chip.eng{border-color:var(--eng);color:var(--eng)}
+.chip.eng.active{background:var(--eng);color:#000}
+.chip.ppic{border-color:var(--ppic);color:var(--ppic)}
+.chip.ppic.active{background:var(--ppic);color:#000}
+.chip.prc{border-color:var(--prc);color:var(--prc)}
+.chip.prc.active{background:var(--prc);color:#000}
+.chip.qc{border-color:var(--qc);color:var(--qc)}
+.chip.qc.active{background:var(--qc);color:#000}
+.chip.acc{border-color:var(--acc);color:var(--acc)}
+.chip.acc.active{background:var(--acc);color:#000}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  background:var(--bg2);
+}
+.tab{
+  padding:10px 20px;font-size:13px;font-weight:600;
+  cursor:pointer;border-bottom:2px solid transparent;
+  color:var(--muted);transition:all .15s;
+  display:flex;align-items:center;gap:6px;
+}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* ── STATS BAR ── */
+.stats{
+  display:flex;gap:1px;
+  background:var(--border);
+  border-bottom:1px solid var(--border);
+}
+.stat{
+  flex:1;background:var(--bg2);padding:10px 16px;
+  display:flex;flex-direction:column;gap:2px;
+}
+.stat-num{font-size:20px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* ── KANBAN ── */
+#view-kanban{display:none}
+#view-kanban.active{display:block}
+.kanban{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(200px,1fr));
+  gap:1px;background:var(--border);
+  min-height:calc(100vh - 220px);
+}
+.kanban-col{background:var(--bg2);display:flex;flex-direction:column}
+.kanban-header{
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:56px;background:var(--bg2);z-index:5;
+}
+.kanban-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.kanban-count{
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  background:var(--bg3);border:1px solid var(--border2);
+  padding:2px 6px;border-radius:4px;color:var(--muted);
+}
+.kanban-body{padding:8px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;max-height:calc(100vh-180px)}
+.kanban-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:10px;cursor:pointer;
+  transition:all .15s;position:relative;overflow:hidden;
+}
+.kanban-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--card-accent,var(--accent));
+}
+.kanban-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.card-ws{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent2);margin-bottom:4px}
+.card-customer{font-size:12px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-part{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+.card-meta{display:flex;align-items:center;justify-content:space-between;gap:4px}
+.card-event{font-size:9px;background:var(--bg);border:1px solid var(--border);padding:2px 5px;border-radius:3px;color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-time{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.card-deadline{font-size:9px;padding:2px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace}
+.card-deadline.late{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.card-deadline.soon{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3)}
+.card-deadline.ok{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.empty-col{padding:20px;text-align:center;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace}
+
+/* ── TIMELINE ── */
+#view-timeline{display:none}
+#view-timeline.active{display:block;padding:20px 24px}
+.timeline-ws{
+  margin-bottom:20px;
+  border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;background:var(--bg2);
+}
+.timeline-ws-header{
+  padding:12px 16px;background:var(--bg3);
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;
+}
+.ws-header-left{display:flex;align-items:center;gap:10px}
+.ws-no{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent2)}
+.ws-customer{font-size:12px;color:var(--text)}
+.ws-part{font-size:11px;color:var(--muted)}
+.ws-progress{display:flex;align-items:center;gap:8px}
+.progress-bar-wrap{width:120px;height:4px;background:var(--bg);border-radius:2px}
+.progress-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
+.progress-pct{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted)}
+.timeline-events{padding:12px 16px;display:flex;flex-direction:column;gap:0}
+.t-event{
+  display:flex;gap:12px;padding:8px 0;
+  border-bottom:1px solid var(--border);
+  animation:fadeIn .3s ease;
+}
+.t-event:last-child{border-bottom:none}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.t-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:0;min-width:20px}
+.t-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--dot-color,var(--accent));background:var(--bg);margin-top:3px;flex-shrink:0}
+.t-line{flex:1;width:1px;background:var(--border);margin:2px 0}
+.t-body{flex:1}
+.t-dept{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dot-color,var(--accent))}
+.t-event-name{font-size:12px;font-weight:600;margin-top:1px}
+.t-user{font-size:10px;color:var(--muted)}
+.t-time{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.t-divisi-badges{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.t-badge{font-size:9px;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace}
+
+/* ── DETAIL MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:12px;width:90%;max-width:520px;
+  max-height:80vh;overflow-y:auto;
+}
+.modal-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--bg2);
+}
+.modal-head h3{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.modal-row{display:flex;gap:8px}
+.modal-label{font-size:11px;color:var(--muted);min-width:80px;padding-top:1px}
+.modal-val{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;flex:1;word-break:break-all}
+.modal-divider{border:none;border-top:1px solid var(--border);margin:4px 0}
+.modal-history{display:flex;flex-direction:column;gap:6px}
+.modal-h-item{
+  background:var(--bg3);border-radius:6px;padding:8px 10px;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.modal-h-dept{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;margin-top:1px}
+.modal-h-right{flex:1}
+.modal-h-event{font-size:12px;font-weight:600}
+.modal-h-meta{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px}
+
+/* ── LOADING ── */
+.loading{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px;gap:12px;color:var(--muted);
+}
+.spinner{
+  width:32px;height:32px;border:2px solid var(--border2);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── EMPTY ── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px;gap:8px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+}
+
+@media(max-width:900px){
+  .kanban{grid-template-columns:repeat(3,minmax(180px,1fr))}
+  .stats{flex-wrap:wrap}
+  .stat{min-width:33%}
+}
+@media(max-width:600px){
+  .kanban{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <div>
+      <div class="brand-name">PT KMIL</div>
+      <div class="brand-sub">WS Tracking Dashboard</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot loading" id="syncDot"></div>
+      <span id="syncTxt">Loading...</span>
+    </div>
+    <button class="btn-refresh" onclick="loadData()">↻ Refresh</button>
+    <a href="index.html" style="font-size:12px;color:var(--muted);text-decoration:none">← Back</a>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Cari WS, customer, part..." oninput="applyFilter()">
+  </div>
+  <div class="filter-chips">
+    <div class="chip all active" onclick="setFilter('all',this)">All</div>
+    <div class="chip mkt" onclick="setFilter('Marketing',this)">Marketing</div>
+    <div class="chip eng" onclick="setFilter('Engineering',this)">Engineering</div>
+    <div class="chip ppic" onclick="setFilter('PPIC',this)">PPIC</div>
+    <div class="chip prc" onclick="setFilter('Production',this)">Production</div>
+    <div class="chip qc" onclick="setFilter('QC',this)">QC</div>
+    <div class="chip acc" onclick="setFilter('Accounting',this)">Accounting</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats" id="statsBar">
+  <div class="stat"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">Total WS</div></div>
+  <div class="stat"><div class="stat-num" style="color:var(--mkt)" id="s-mkt">—</div><div class="stat-lbl">Marketing</div></div>
+  <div class="stat"><div class="stat-num" style="color:var(--eng)" id="s-eng">—</div><div class="stat-lbl">Engineering</div></div>
+  <div class="stat"><div class="stat-num" style="color:var(--ppic)" id="s-ppic">—</div><div class="stat-lbl">PPIC</div></div>
+  <div class="stat"><div class="stat-num" style="color:var(--prc)" id="s-prc">—</div><div class="stat-lbl">Production</div></div>
+  <div class="stat"><div class="stat-num" style="color:var(--qc)" id="s-qc">—</div><div class="stat-lbl">QC</div></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('kanban',this)">📋 Kanban Board</div>
+  <div class="tab" onclick="switchTab('timeline',this)">📅 Timeline per WS</div>
+</div>
+
+<!-- KANBAN VIEW -->
+<div id="view-kanban" class="active">
+  <div class="kanban" id="kanbanBoard">
+    <div class="loading" style="grid-column:1/-1"><div class="spinner"></div><span>Memuat data...</span></div>
+  </div>
+</div>
+
+<!-- TIMELINE VIEW -->
+<div id="view-timeline">
+  <div id="timelineList"><div class="loading"><div class="spinner"></div><span>Memuat data...</span></div></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Detail WS</h3>
+      <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ltxjikrlcnyfyzlsvxof.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0eGppa3JsY255Znl6bHN2eG9mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MDg1MTcsImV4cCI6MjA5NTQ4NDUxN30.f5B_X2XHE41vfRajbtYCR_7-PgK7TWuhcd9kcKxhYW4';
+const HDR={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY};
+
+const DEPT_ORDER=['Marketing','Engineering','PPIC','Production','QC','Accounting'];
+const DEPT_COLOR={Marketing:'var(--mkt)',Engineering:'var(--eng)',PPIC:'var(--ppic)',Production:'var(--prc)',QC:'var(--qc)',Accounting:'var(--acc)'};
+const DEPT_CLASS={Marketing:'mkt',Engineering:'eng',PPIC:'ppic',Production:'prc',QC:'qc',Accounting:'acc'};
+const DEPT_BG={Marketing:'rgba(167,139,250,.15)',Engineering:'rgba(96,165,250,.15)',PPIC:'rgba(52,211,153,.15)',Production:'rgba(251,146,60,.15)',QC:'rgba(244,114,182,.15)',Accounting:'rgba(250,204,21,.15)'};
+
+let allEvents=[];
+let wsMap={};
+let activeFilter='all';
+let activeTab='kanban';
+
+async function loadData(){
+  setSyncStatus('loading','Syncing...');
+  try{
+    const r=await fetch(SUPA_URL+'/rest/v1/events?select=*&order=ts.asc&limit=5000',{headers:HDR});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    allEvents=await r.json();
+    buildWsMap();
+    updateStats();
+    applyFilter();
+    setSyncStatus('ok','Synced · '+allEvents.length+' events');
+  }catch(e){
+    setSyncStatus('err','Error: '+e.message);
+    console.error(e);
+  }
+}
+
+function buildWsMap(){
+  wsMap={};
+  allEvents.forEach(ev=>{
+    if(!ev.no_ws) return;
+    if(!wsMap[ev.no_ws]) wsMap[ev.no_ws]={no_ws:ev.no_ws,customer:ev.customer||'',part:ev.part||'',no_po:ev.no_po||'',deadline:ev.deadline||'',ws_type:ev.ws_type||'',events:[],lastDept:'',lastEvent:'',lastTs:''};
+    const ws=wsMap[ev.no_ws];
+    ws.events.push(ev);
+    // Update latest
+    if(!ws.lastTs||ev.ts>ws.lastTs){
+      ws.lastTs=ev.ts;ws.lastDept=ev.department||'';ws.lastEvent=ev.event||'';
+      if(ev.customer) ws.customer=ev.customer;
+      if(ev.part) ws.part=ev.part;
+      if(ev.no_po) ws.no_po=ev.no_po;
+      if(ev.deadline) ws.deadline=ev.deadline;
+      if(ev.ws_type) ws.ws_type=ev.ws_type;
+    }
+  });
+}
+
+function updateStats(){
+  const wsList=Object.values(wsMap);
+  document.getElementById('s-total').textContent=wsList.length;
+  DEPT_ORDER.forEach(d=>{
+    const id='s-'+{Marketing:'mkt',Engineering:'eng',PPIC:'ppic',Production:'prc',QC:'qc',Accounting:'acc'}[d];
+    const el=document.getElementById(id);
+    if(el) el.textContent=wsList.filter(w=>w.lastDept===d).length;
+  });
+}
+
+function applyFilter(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  let wsList=Object.values(wsMap);
+  if(activeFilter!=='all') wsList=wsList.filter(w=>w.lastDept===activeFilter);
+  if(q) wsList=wsList.filter(w=>(w.no_ws+w.customer+w.part+w.no_po).toLowerCase().includes(q));
+  if(activeTab==='kanban') renderKanban(wsList);
+  else renderTimeline(wsList);
+}
+
+function setFilter(f,el){
+  activeFilter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  applyFilter();
+}
+
+function switchTab(tab,el){
+  activeTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('view-kanban').classList.toggle('active',tab==='kanban');
+  document.getElementById('view-timeline').classList.toggle('active',tab==='timeline');
+  applyFilter();
+}
+
+/* ── KANBAN ── */
+function renderKanban(wsList){
+  const board=document.getElementById('kanbanBoard');
+  board.innerHTML='';
+  DEPT_ORDER.forEach(dept=>{
+    const col=document.createElement('div');
+    col.className='kanban-col';
+    const cards=wsList.filter(w=>w.lastDept===dept);
+    col.innerHTML=`
+      <div class="kanban-header" style="border-top:2px solid ${DEPT_COLOR[dept]}">
+        <span class="kanban-title" style="color:${DEPT_COLOR[dept]}">${dept}</span>
+        <span class="kanban-count">${cards.length}</span>
+      </div>
+      <div class="kanban-body" id="col-${dept}"></div>`;
+    board.appendChild(col);
+    const body=col.querySelector('.kanban-body');
+    if(!cards.length){
+      body.innerHTML='<div class="empty-col">— kosong —</div>';
+    } else {
+      cards.sort((a,b)=>b.lastTs.localeCompare(a.lastTs)).forEach(w=>{
+        body.appendChild(makeCard(w,dept));
+      });
+    }
+  });
+}
+
+function makeCard(w,dept){
+  const el=document.createElement('div');
+  el.className='kanban-card';
+  el.style.setProperty('--card-accent',DEPT_COLOR[dept]);
+  const dl=deadlineStatus(w.deadline);
+  const timeAgo=relTime(w.lastTs);
+  el.innerHTML=`
+    <div class="card-ws">${w.no_ws}</div>
+    <div class="card-customer">${w.customer||'—'}</div>
+    <div class="card-part">${w.part||'—'}</div>
+    <div class="card-meta">
+      <span class="card-event">${w.lastEvent||'—'}</span>
+      ${w.deadline?`<span class="card-deadline ${dl.cls}">${dl.label}</span>`:`<span class="card-time">${timeAgo}</span>`}
+    </div>`;
+  el.onclick=()=>openDetail(w);
+  return el;
+}
+
+/* ── TIMELINE ── */
+function renderTimeline(wsList){
+  const list=document.getElementById('timelineList');
+  list.innerHTML='';
+  if(!wsList.length){list.innerHTML='<div class="empty-state">📭 Tidak ada data</div>';return;}
+  wsList.sort((a,b)=>b.lastTs.localeCompare(a.lastTs)).forEach(w=>{
+    const reached=getReachedDepts(w);
+    const pct=Math.round(reached.length/DEPT_ORDER.length*100);
+    const wrap=document.createElement('div');
+    wrap.className='timeline-ws';
+    const dl=deadlineStatus(w.deadline);
+    wrap.innerHTML=`
+      <div class="timeline-ws-header" onclick="toggleTimeline(this)">
+        <div class="ws-header-left">
+          <span class="ws-no">${w.no_ws}</span>
+          <div>
+            <div class="ws-customer">${w.customer||'—'} ${w.deadline?`<span class="card-deadline ${dl.cls}" style="font-size:9px">${dl.label}</span>`:''}</div>
+            <div class="ws-part">${w.part||'—'}</div>
+          </div>
+        </div>
+        <div class="ws-progress">
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+          <span class="progress-pct">${pct}%</span>
+          <span style="font-size:14px;color:var(--muted);transition:.2s" class="toggle-arrow">▼</span>
+        </div>
+      </div>
+      <div class="timeline-events" style="display:none">${buildTimelineEvents(w)}</div>`;
+    list.appendChild(wrap);
+  });
+}
+
+function toggleTimeline(header){
+  const body=header.nextElementSibling;
+  const arrow=header.querySelector('.toggle-arrow');
+  const open=body.style.display==='none';
+  body.style.display=open?'flex':'none';
+  arrow.style.transform=open?'rotate(180deg)':'';
+}
+
+function buildTimelineEvents(w){
+  if(!w.events.length) return '<div class="empty-col">No events</div>';
+  return w.events.sort((a,b)=>a.ts.localeCompare(b.ts)).map((ev,i,arr)=>{
+    const color=DEPT_COLOR[ev.department]||'var(--accent)';
+    const isLast=i===arr.length-1;
+    return `<div class="t-event">
+      <div class="t-dot-wrap">
+        <div class="t-dot" style="--dot-color:${color}"></div>
+        ${!isLast?'<div class="t-line"></div>':''}
+      </div>
+      <div class="t-body">
+        <div class="t-dept" style="color:${color}">${ev.department||'?'}</div>
+        <div class="t-event-name">${ev.event||'—'}</div>
+        <div class="t-user">${ev.user||''} ${ev.operation?'· '+ev.operation:''}</div>
+        <div class="t-time">${formatTs(ev.ts)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getReachedDepts(w){
+  const depts=new Set(w.events.map(e=>e.department));
+  return DEPT_ORDER.filter(d=>depts.has(d));
+}
+
+/* ── DETAIL MODAL ── */
+function openDetail(w){
+  document.getElementById('modalTitle').textContent=w.no_ws;
+  const color=DEPT_COLOR[w.lastDept]||'var(--accent)';
+  const reached=getReachedDepts(w);
+  const pct=Math.round(reached.length/DEPT_ORDER.length*100);
+
+  let html=`
+    <div class="modal-row"><span class="modal-label">NO WS</span><span class="modal-val" style="color:var(--accent2)">${w.no_ws}</span></div>
+    <div class="modal-row"><span class="modal-label">Customer</span><span class="modal-val">${w.customer||'—'}</span></div>
+    <div class="modal-row"><span class="modal-label">Part</span><span class="modal-val">${w.part||'—'}</span></div>
+    <div class="modal-row"><span class="modal-label">NO PO</span><span class="modal-val">${w.no_po||'—'}</span></div>
+    <div class="modal-row"><span class="modal-label">Deadline</span><span class="modal-val">${w.deadline||'—'}</span></div>
+    <div class="modal-row"><span class="modal-label">WS Type</span><span class="modal-val">${w.ws_type||'—'}</span></div>
+    <div class="modal-row"><span class="modal-label">Status</span><span class="modal-val" style="color:${color}">${w.lastDept} — ${w.lastEvent}</span></div>
+    <hr class="modal-divider">
+    <div style="margin-bottom:6px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">PROGRESS (${pct}%)</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${DEPT_ORDER.map(d=>{
+          const done=reached.includes(d);
+          const isCurrent=d===w.lastDept;
+          return `<span style="font-size:10px;padding:3px 8px;border-radius:4px;font-family:monospace;
+            background:${done?DEPT_BG[d]:'var(--bg3)'};
+            color:${done?DEPT_COLOR[d]:'var(--muted)'};
+            border:1px solid ${isCurrent?DEPT_COLOR[d]:done?DEPT_COLOR[d]+'44':'var(--border)'};
+            font-weight:${isCurrent?'700':'400'}">${isCurrent?'▶ ':''}${d}</span>`;
+        }).join('')}
+      </div>
+    </div>
+    <hr class="modal-divider">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">HISTORY (${w.events.length} events)</div>
+    <div class="modal-history">
+      ${w.events.sort((a,b)=>b.ts.localeCompare(a.ts)).map(ev=>{
+        const c=DEPT_COLOR[ev.department]||'var(--accent)';
+        const bg=DEPT_BG[ev.department]||'var(--bg3)';
+        return `<div class="modal-h-item">
+          <span class="modal-h-dept" style="background:${bg};color:${c}">${ev.department||'?'}</span>
+          <div class="modal-h-right">
+            <div class="modal-h-event">${ev.event||'—'} ${ev.operation?'· '+ev.operation:''}</div>
+            <div class="modal-h-meta">${ev.user||''} · ${formatTs(ev.ts)}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').classList.remove('open');
+}
+
+/* ── HELPERS ── */
+function setSyncStatus(state,txt){
+  const dot=document.getElementById('syncDot');
+  dot.className='sync-dot '+(state==='ok'?'ok':state==='loading'?'loading':'');
+  document.getElementById('syncTxt').textContent=txt;
+}
+
+function deadlineStatus(dl){
+  if(!dl) return{cls:'',label:''};
+  const d=new Date(dl);const now=new Date();
+  const diff=Math.ceil((d-now)/(1000*60*60*24));
+  if(diff<0) return{cls:'late',label:'TERLAMBAT'};
+  if(diff<=3) return{cls:'soon',label:diff+'h lagi'};
+  return{cls:'ok',label:diff+'h lagi'};
+}
+
+function formatTs(ts){
+  if(!ts) return'—';
+  try{
+    const d=new Date(ts);
+    return d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})+
+      ' '+d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  }catch{return ts}
+}
+
+function relTime(ts){
+  if(!ts) return'—';
+  const diff=Date.now()-new Date(ts).getTime();
+  const m=Math.floor(diff/60000);
+  if(m<1) return'baru saja';
+  if(m<60) return m+'m lalu';
+  const h=Math.floor(m/60);
+  if(h<24) return h+'j lalu';
+  return Math.floor(h/24)+'h lalu';
+}
+
+// Auto-refresh every 30 seconds
+setInterval(loadData,30000);
+loadData();
+</script>
+</body>
+</html>
