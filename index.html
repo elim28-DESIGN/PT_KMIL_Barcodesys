@@ -5799,9 +5799,8 @@ if(d==='QC'){
             if(typeof showToast==='function') showToast('QC Assembling sync selesai — '+childWsList.length+' child ✓','ok');
           }catch(e){
             setMsg(d,'✓ Local OK — Supabase partial: '+e.message,'warn');
-      } else {
-        setMsg(d,'✓ Saved locally (GAS URL belum diisi di ⚙️ Settings)','warn');
-      }
+          }
+        })();
       return; /* skip the generic GAS push below */
     }
   }
