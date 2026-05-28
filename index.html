@@ -5542,14 +5542,28 @@ async function saveRoutingToSheets(){
   const m=$i('prd-routing-msg');
   if(m){m.textContent='⏳ Menyimpan routing…';m.className='smsg info';}
 
-  const cfg=JSON.parse(localStorage.getItem(CK)||'{}');
-  /* Supabase: insert semua routing rows sekaligus */
+  /* Build rows dari routingRows global */
+  const st=getRoutingSt();
+  const now=new Date().toISOString();
+  const rows=(routingRows||[]).map((r,idx)=>({
+    ts:now, no_ws:noWs, routing_seq:idx+1,
+    routing_ws_ref:r.ws||noWs, routing_op:r.op||'',
+    routing_dur:r.dur||'', routing_status:r.status||'PENDING',
+    user:r.operator||'', department:'Production',
+    event:'Routing Process', saved_at:now
+  }));
+  if(!rows.length){
+    if(m){m.textContent='⚠️ Tidak ada routing steps.';m.className='smsg err';}
+    return;
+  }
+  /* Supabase: insert semua routing rows */
   let ok=0,fail=0;
   for(let i=0;i<rows.length;i++){
     try{await supaInsert('routing_process',rows[i]);ok++;}
     catch(e){fail++;console.warn('[Routing] Row',i+1,'failed:',e.message);}
   }
   /* Mark saved */
+  if(!st[noWs]) st[noWs]={};
   st[noWs].saved_to_sheets=(fail===0);
   saveRoutingSt(st);
   if(fail>0&&ok===0){
