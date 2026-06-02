@@ -1,165 +1,187 @@
-# PT KMIL — ERP Barcode System V44
+# PT KMIL — WS Barcode & Tracking System
 
-> Industrial-grade, single-file web ERP for shop-floor tracking.  
-> Runs entirely in the browser — no server required. Google Sheets as the backend.
+> Sistem manajemen Work Sheet (WS) berbasis web untuk PT KMIL.  
+> Pencatatan event antar divisi, QR barcode, routing proses produksi, dan dashboard tracking real-time.
+
+**🔗 Live:** https://elim28-design.github.io/PT_KMIL_Barcodesys/  
+**📊 Tracking:** https://elim28-design.github.io/PT_KMIL_Barcodesys/tracking.html
 
 ---
 
-## Stack
+## Fitur
 
-| Layer | Technology |
+| Fitur | Keterangan |
 |---|---|
-| Frontend | Vanilla HTML/CSS/JS — single file, zero build step |
-| Font | Inter (UI) + JetBrains Mono (codes, timestamps) |
-| Backend | Google Apps Script (GAS) — deployed as Web App |
-| Storage | Google Sheets + `localStorage` (offline cache) |
-| QR Scan | jsQR (camera) + barcode scanner (USB/BT) |
+| Multi-divisi | Marketing, Engineering, PPIC, Purchasing, Production, QC, Accounting |
+| Real-time sync | Semua PC otomatis sinkron via Supabase — tanpa konfigurasi |
+| QR Code & Barcode | Generate dan print label WS |
+| Routing Process | Tracking urutan operasi di Production |
+| Tracking Dashboard | Kanban board + Timeline per WS, light/dark mode |
+| Offline-first | Data cache di localStorage, sync ke cloud saat online |
 
 ---
 
-## Features
-
-### Divisions & Flow
-All work orders follow a strict sequential flow:
+## File
 
 ```
-Marketing → Engineering → PPIC → Production → QC → Accounting
+PT_KMIL_Barcodesys/
+├── index.html       ← Aplikasi utama (input event semua divisi)
+├── tracking.html    ← Dashboard Kanban & Timeline
+└── README.md
 ```
-
-Each division can only fill their form after the previous division has an event saved. Validation is real-time against Google Sheets.
-
-| Division | Key Capabilities |
-|---|---|
-| **Marketing** | Create WS (Single Part / Assembling range), upload drawing, set deadline |
-| **Engineering** | Drawing release, NC report, auto-sync child WS from Marketing |
-| **PPIC** | Material planning, BOM entry, auto-generate from Marketing data |
-| **Production** | OP events, routing process table, assembly parts, material check |
-| **QC** | Bulk inspection per material, pass/fail/rework per item, SJ upload |
-| **Accounting** | Final save, SJ confirmation, delivery tracking |
-
-### Other Features
-- **Catalog / Vault** — searchable archive of all WS events from Sheets
-- **Dashboard** — live status per WS across all divisions
-- **Stock Tracker** — simple in/out per material
-- **DT (Downtime) Tracker** — machine-level downtime logging
-- **Camera QR Scanner** — works on iOS/Android without native app
-- **Offline-first** — all data saved to `localStorage`, sync to Sheets on demand
-- **Light/Dark mode** — system preference, T&C always light
-- **Responsive** — mobile-friendly with bottom nav
 
 ---
 
-## Setup
+## Arsitektur
 
-### 1. Google Apps Script
+```
+Browser (index.html / tracking.html)
+    │
+    ├── localStorage  ← offline cache
+    │
+    └── Supabase REST API
+            │
+            └── PostgreSQL (Singapore)
+                    ├── events
+                    └── routing_process
+```
 
-1. Go to [script.google.com](https://script.google.com) → New project
-2. Paste the entire contents of `Code.gs` (V44)
-3. Set your Spreadsheet ID:
-   ```js
-   var SPREADSHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms';
-   ```
-4. Run `setupSheets()` once from the editor to create sheet tabs
-5. **Deploy → New deployment → Web App**
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-6. Copy the deployment URL
+Tidak ada server sendiri.  
+**GitHub Pages** = static hosting.  
+**Supabase** = database cloud PostgreSQL.
 
-### 2. Website Settings
+---
 
-1. Open `index.html` in a browser
-2. Click **⚙️ Settings** (top-right)
-3. Paste the GAS URL into **Google Apps Script URL**
-4. The **GAS URL Routing** field can use the same URL
-5. Click Save
+## Database
 
-### 3. Sheet Structure
+**Project ID:** `ltxjikrlcnyfyzlsvxof`  
+**Region:** Southeast Asia (Singapore)  
+**Plan:** Free (500 MB database, cukup untuk jutaan rows)
 
-Two sheets are auto-created by `setupSheets()`:
+### Tabel `events`
 
-**`Events`** — all division events
-
-| Column | Description |
+| Kolom | Keterangan |
 |---|---|
-| `ts` | ISO timestamp |
-| `department` | Marketing / Engineering / PPIC / Production / QC / Accounting |
-| `event` | Event name (WS Created, Drawing Released, etc.) |
-| `no_ws` | Work order number |
-| `customer`, `part`, `operation` | WO details |
-| `status` | CREATED / IN PROGRESS / DONE / etc. |
-| ... | See `HEADERS_EVENTS` in Code.gs for full list |
+| `id` | Primary key (auto) |
+| `ts` | Timestamp ISO 8601 |
+| `department` | Divisi pencatat |
+| `event` | Nama event |
+| `no_ws` | Nomor Work Sheet |
+| `no_po` | Nomor Purchase Order |
+| `customer` | Nama customer |
+| `part` | Nama part/komponen |
+| `operation` | Operasi mesin |
+| `ws_type` | REGULER / ASSEMBLING |
+| `qty` | Jumlah |
+| `user` | Nama operator |
+| `status` | Status WS |
+| `deadline` | Tanggal deadline |
+| `remarks` | Catatan |
+| `unit_set` | Unit/set (Marketing) |
+| `assy_parts` | Parts assembling |
+| `assy_qty_json` | Qty parts (JSON) |
+| `ws_start` | WS awal range |
+| `ws_end_suffix` | WS akhir range |
 
-**`RoutingProcess`** — production routing steps
+### Tabel `routing_process`
 
-| Column | Description |
+| Kolom | Keterangan |
 |---|---|
-| `no_ws` | Work order |
-| `routing_seq` | Step sequence number |
-| `routing_op` | Operation name (BUBUT, MILLING, etc.) |
-| `routing_dur` | Duration estimate |
+| `id` | Primary key (auto) |
+| `no_ws` | Nomor Work Sheet |
+| `routing_seq` | Urutan operasi |
+| `routing_op` | Nama operasi |
+| `routing_dur` | Estimasi durasi |
 | `routing_status` | PENDING / IN PROGRESS / DONE |
+| `user` | Operator |
+| `department` | Divisi |
+| `ts` | Timestamp |
+| `saved_at` | Waktu disimpan |
 
 ---
 
-## File Structure
+## Setup Supabase (jika perlu reset)
 
-```
-index.html          ← Main ERP app (single file, self-contained)
-Code.gs             ← Google Apps Script backend
-README.md           ← This file
+Jalankan di **Supabase → SQL Editor:**
+
+```sql
+-- Tabel Events
+create table if not exists events (
+  id bigserial primary key,
+  ts text, department text, event text, revisi text,
+  no_ws text, no_po text, customer text, part text,
+  operation text, ws_type text, qty text, "user" text,
+  ws_turun text, ws_turun_detail text, parsial text,
+  parsial_qty text, parsial_sisa text, mat_count text,
+  drawing_filename text, deadline text, remarks text,
+  status text, shift text, ws_type_prd text,
+  assy_parts_summary text, qc_bulk text, sj_filename text,
+  assy_turun text, ws_start text, ws_end_suffix text,
+  unit_set text, assy_qty_json text, assy_parts text,
+  created_at timestamptz default now()
+);
+
+-- Tabel Routing
+create table if not exists routing_process (
+  id bigserial primary key,
+  ts text, no_ws text, routing_seq integer,
+  routing_ws_ref text, routing_op text, routing_dur text,
+  routing_status text, "user" text, department text,
+  event text, saved_at text,
+  created_at timestamptz default now()
+);
+
+-- Row Level Security
+alter table events enable row level security;
+alter table routing_process enable row level security;
+create policy "allow all" on events for all using (true) with check (true);
+create policy "allow all" on routing_process for all using (true) with check (true);
 ```
 
 ---
 
-## GAS subActions
+## Flow WS antar Divisi
 
-| subAction | Direction | Description |
-|---|---|---|
-| `appendEvent` | Write | Save one event to `Events` sheet |
-| `appendRouting` | Write | Save routing step(s) to `RoutingProcess` |
-| `listEvents` | Read | Return all rows from `Events` as JSON |
-| `listRouting` | Read | Return all rows from `RoutingProcess` as JSON |
-| `generateWsRange` | Write | Batch-create Assembling child WS in `Events` |
+```
+Marketing ──► Engineering ──► PPIC ──► Production ──► QC ──► Accounting
+   │               │            │           │           │
+ WS Created    Drawing       BOM &      Routing      Inspeksi    Delivered
+ Order         Released    Material     Process      QC OK/NG
+```
 
-All communication uses **JSONP** (no CORS issues, works on mobile Safari).
+---
+
+## Deploy
+
+Website otomatis update saat push ke branch `main`:
+
+```bash
+git add index.html tracking.html README.md
+git commit -m "Update: deskripsi perubahan"
+git push origin main
+```
+
+Tunggu 1–2 menit → live site terupdate.
 
 ---
 
 ## Changelog
 
-### V44 (Current)
-- Font changed to **Inter** (UI) + **JetBrains Mono** (codes) — Segoe UI family, readable on all screens
-- Event names, NO_WS, division labels → **bold** in all tables and timeline
-- Timestamps → Inter 11.5px medium (no more monospace timestamps)
-- Table borders → **2px** throughout all divisions
-- Buttons → Inter semibold, industrial flat style
-- T&C modal → **always light mode**, Inter body font
-- `saveRoutingToSheets` → fixed to use `jsonpCall` instead of `fetch no-cors` (data now actually reaches Sheets)
-- `appendRouting` added to `isWrite` in `jsonpCall`
-- Status messages (`smsg`) → Inter font for readability
-- Version bumped from V42 → V44
+### V43 — Supabase Integration (current)
+- ✅ Migrasi dari Google Apps Script ke Supabase PostgreSQL
+- ✅ Auto-sync real-time — tidak perlu isi URL di setiap PC
+- ✅ Semua tombol "Save to Sheets" → "Save to Supabase"
+- ✅ `tracking.html` — Kanban board + Timeline dengan light/dark mode
+- ✅ Font formal IBM Plex (tracking dashboard)
+- ✅ Fix routing_process save ke Supabase
+- ✅ Fix missing columns (unit_set, assy_parts, assy_qty_json)
 
-### V42.1 (GAS)
-- Added `listRouting` handler
-- Fixed `handleListEvents` to not skip rows with empty `ts`
-- `appendRouting` supports batch (array) and single row
-- All extended Marketing fields (`ws_start`, `ws_end_suffix`) included in `listEvents`
+### V42.1 — GAS Fixes
+- Fix listRouting handler
+- Fix filter ts di fetchFromSheets
+- Fix dedup composite key no_ws+ts
 
----
-
-## Browser Support
-
-| Browser | Support |
-|---|---|
-| Chrome / Edge 90+ | ✅ Full |
-| Safari 15+ (iOS/macOS) | ✅ Full incl. camera scan |
-| Firefox 88+ | ✅ Full |
-| Samsung Internet | ✅ |
-
-> **Note:** Requires a live GAS deployment URL for Sheets sync. Offline mode (localStorage only) works without internet.
-
----
-
-## License
-
-Internal tool — PT KMIL. Not for redistribution.
+### V42 — Multi-divisi
+- Tambah Engineering, PPIC, Purchasing, QC, Accounting
+- Routing Process Production
+- Assembling WS range generator
