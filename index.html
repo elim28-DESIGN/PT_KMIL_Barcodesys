@@ -2922,6 +2922,59 @@ body::before{
 <div id="status-Marketing" class="smsg"></div>
 </div><!-- /mkt-order-type-sc -->
 <!-- ── QR FINDER (Marketing) ── -->
+<!-- ── QR FINDER (Marketing) ── -->
+<!-- ═══ ROUTING PROCESS TABLE (Marketing) ═══ -->
+<!-- ═══ ROUTING PROCESS TABLE ═══ -->
+<div class="sc" id="mkt-routing-panel" style="border-color:color-mix(in srgb,var(--mkt) 30%,transparent)">
+<h3 style="color:var(--mkt)">🗂️ Routing Process <span id="mkt-routing-ws-badge" style="font-weight:400;color:var(--muted);font-size:10px"></span></h3>
+<div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px;padding:6px 9px;background:color-mix(in srgb,var(--mkt) 6%,var(--card));border-radius:4px;border-left:2px solid var(--mkt)">
+  📋 Routing process per WS — guideline untuk Production Data. User: <strong style="color:#facc15">Agus</strong>
+</div>
+<!-- ── Jumlah Routing Selector ── -->
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:color-mix(in srgb,var(--mkt) 5%,var(--card));border-radius:5px;border:1px solid color-mix(in srgb,var(--mkt) 20%,transparent)">
+<span style="font-size:12px;font-family:var(--mono);color:var(--muted);white-space:nowrap">Jumlah Routing:</span>
+<select id="mkt-routing-count-sel" class="mat-sel" style="max-width:90px;font-size:14px;font-weight:700" onchange="handleRoutingCountChange(this)">
+<option value="0">— Pilih</option>
+<option value="1">1</option><option value="2">2</option><option value="3">3</option>
+<option value="4">4</option><option value="5">5</option><option value="6">6</option>
+<option value="7">7</option><option value="8">8</option><option value="9">9</option>
+<option value="10">10</option>
+<option value="custom">Custom...</option>
+</select>
+<div id="mkt-routing-custom-row" style="display:none;align-items:center;gap:6px">
+  <input id="mkt-routing-custom-inp" type="number" min="11" max="200" placeholder="11–200"
+    style="width:72px;padding:5px 7px;background:var(--inp);border:1.5px solid var(--mkt);border-radius:4px;color:var(--text);font-size:13px;font-family:var(--mono);font-weight:700;outline:none"
+    oninput="applyCustomRoutingCount(this.value)">
+  <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">max 200</span>
+</div>
+<span style="font-size:11px;color:var(--faint);font-family:var(--mono)">step routing per WS</span>
+<button class="btn btn-s" style="font-size:11px;color:#8b5cf6;border-color:#8b5cf6;margin-left:auto" onclick="autoFillRoutingFromType()">⚡ Auto-fill</button>
+<button class="btn btn-s" style="font-size:11px" onclick="clearRoutingRows()">🗑 Clear</button>
+<span style="font-size:10px;color:var(--faint);font-family:var(--mono)" id="mkt-routing-count"></span>
+</div>
+<!-- Routing Table -->
+<div class="mat-wrap" style="margin-bottom:10px">
+<table class="mat-table" id="mkt-routing-table" style="min-width:620px">
+<thead><tr>
+<th style="width:36px">No</th>
+<th style="min-width:110px">NO_WS / Part</th>
+<th style="min-width:190px">Process / Operation <span style="color:#ef4444">*</span></th>
+<th style="min-width:110px">Est. Durasi <span style="color:#ef4444">*</span></th>
+<th style="min-width:120px">Status</th>
+</tr></thead>
+<tbody id="mkt-routing-tbody">
+<tr><td colspan="5" style="text-align:center;padding:18px;font-size:12px;color:var(--faint)">Pilih jumlah routing di atas atau scan WS terlebih dahulu.</td></tr>
+</tbody>
+</table>
+</div>
+<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+<button class="btn btn-green" style="font-size:13px;font-weight:700;padding:7px 16px" onclick="saveRoutingToSheets()">💾 Save Routing to Supabase</button>
+<button class="btn btn-s" style="font-size:11px;color:var(--mkt);border-color:var(--mkt)" onclick="addRoutingRow()">+ Add Row</button>
+<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">WS + semua step → Sheet "RoutingProcess"</span>
+</div>
+<div id="mkt-routing-msg" class="smsg" style="margin-top:7px"></div>
+</div>
+
 <div class="sc" id="mkt-qr-finder">
 <h3>🔍 QR Code Finder — NO_WS Marketing</h3>
 <div class="qrf-wrap">
@@ -5055,6 +5108,13 @@ if(dept==='Production'){
   syncRoutingSel(routingRows.length||0);
   setTimeout(()=>renderPrdEventsLog(ws),80);
 }
+/* ── Marketing routing panel: update WS badge when scanned ── */
+if(dept==='Marketing'){
+  const mktRb=$i('mkt-routing-ws-badge');
+  if(mktRb) mktRb.textContent='· WS: '+ws;
+  const mktSb=$i('mkt-routing-sync-saved-badge');
+  if(mktSb){const _rSt=getRoutingSt()[ws];mktSb.style.display=(_rSt&&_rSt.saved_to_sheets)?'inline':'none';}
+}
 if(dept==='QC'){const _qel=$i('qc-noWs'); if(_qel) _qel.value=ws;
 renderQcBulkItems(ws);
 updateQcLockState();
@@ -5502,7 +5562,10 @@ function autoFillRoutingFromType(){
 
 /* ── VALIDATION ── */
 function validateRoutingRows(){
-  const noWs=$i('prd-noWs')?.value||'';
+  /* Check both Marketing and Production routing panels */
+  const mktBadge=($i('mkt-routing-ws-badge')?.textContent||'').replace('· WS:','').trim();
+  const prdNoWs=$i('prd-noWs')?.value||'';
+  const noWs=mktBadge||prdNoWs;
   if(!noWs) return 'Scan WS terlebih dahulu.';
   if(!routingRows.length) return 'Routing table kosong. Pilih jumlah routing dulu.';
   const invalid=routingRows.filter(r=>!r.op||!r.dur);
@@ -5533,13 +5596,22 @@ function updateRoutingGuidelineBar(){
 /* ── SAVE ROUTING TO SHEETS ── */
 async function saveRoutingToSheets(){
   const errMsg=validateRoutingRows();
+  /* Detect which panel is active - Marketing or Production */
+  const isMkt=document.getElementById('mkt-routing-panel')&&
+    document.getElementById('dept-Marketing')&&
+    document.getElementById('dept-Marketing').classList.contains('active');
+  const msgId=isMkt?'mkt-routing-msg':'prd-routing-msg';
+  const wsInputId=isMkt?'mkt-noWs':'prd-noWs';
   if(errMsg){
-    const m=$i('prd-routing-msg');
+    const m=$i(msgId);
     if(m){m.textContent='⚠️ '+errMsg;m.className='smsg err';}
     return;
   }
-  const noWs=$i('prd-noWs').value;
-  const m=$i('prd-routing-msg');
+  /* Get noWs from routing badge (set when WS scanned) */
+  const _badge=$i(isMkt?'mkt-routing-ws-badge':'prd-routing-ws-badge');
+  const _badgeTxt=(_badge?.textContent||'').replace('· WS:','').trim();
+  const noWs=_badgeTxt||($i('prd-noWs')?.value||'');
+  const m=$i(msgId);
   if(m){m.textContent='⏳ Menyimpan routing…';m.className='smsg info';}
 
   /* Build rows dari routingRows global */
@@ -5549,11 +5621,12 @@ async function saveRoutingToSheets(){
     ts:now, no_ws:noWs, routing_seq:idx+1,
     routing_ws_ref:r.ws||noWs, routing_op:r.op||'',
     routing_dur:r.dur||'', routing_status:r.status||'PENDING',
-    user:r.operator||'', department:'Production',
+    user:r.operator||'', department:isMkt?'Marketing':'Production',
     event:'Routing Process', saved_at:now
   }));
   if(!rows.length){
-    if(m){m.textContent='⚠️ Tidak ada routing steps.';m.className='smsg err';}
+    const mEl=$i(msgId);
+    if(mEl){mEl.textContent='⚠️ Tidak ada routing steps.';mEl.className='smsg err';}
     return;
   }
   /* Supabase: insert semua routing rows */
@@ -5567,7 +5640,8 @@ async function saveRoutingToSheets(){
   st[noWs].saved_to_sheets=(fail===0);
   saveRoutingSt(st);
   if(fail>0&&ok===0){
-    if(m){m.textContent='⚠️ Routing gagal ke Supabase.';m.className='smsg err';}
+    const mEl2=$i(msgId);
+    if(mEl2){mEl2.textContent='⚠️ Routing gagal ke Supabase.';mEl2.className='smsg err';}
     if(typeof showToast==='function') showToast('⚠️ Routing gagal ke Supabase','err');
     return;
   }
