@@ -1853,7 +1853,7 @@ body::before{
   if (!hasData) {
     // First time opening — set empty state, Sheets will sync shortly
     localStorage.setItem(LK, '[]');
-    console.log('[KMIL] Fresh start — waiting for Sheets sync...');
+    console.log('[KMIL] Fresh start — waiting for Supabase sync...');
   } else {
     console.log('[KMIL] Existing localStorage data found — skipping hardcode restore.');
   }
@@ -2404,7 +2404,7 @@ body::before{
 <div class="modal-divider"></div>
 <div style="display:flex;gap:6px;margin-top:8px">
 <button class="btn btn-p" onclick="saveConfig()">💾 Save</button>
-<button class="btn btn-s" onclick="loadFromSheets()">☁️ Load from Sheets</button>
+<button class="btn btn-s" onclick="loadFromSheets()">☁️ Load from Supabase</button>
 <button class="btn btn-g" onclick="closeModal('cfgModal')">Cancel</button>
 </div>
 <div id="cfgMsg" class="smsg"></div>
@@ -2496,7 +2496,7 @@ body::before{
     </div>
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px">
       <span style="min-width:20px;text-align:center;font-weight:700;color:var(--eng);font-family:var(--mono)">4</span>
-      <span>Pilih User → klik <strong>💾 Save to Sheets</strong></span>
+      <span>Pilih User → klik <strong>💾 Save to Supabase</strong></span>
     </div>
   </div>
 </div>
@@ -2515,7 +2515,7 @@ body::before{
     </div>
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px">
       <span style="min-width:20px;text-align:center;font-weight:700;color:var(--ppic);font-family:var(--mono)">2</span>
-      <span>Isi <strong>Qty Total</strong> → pilih event <strong>BOM Released</strong> → klik <strong>💾 Save to Sheets</strong></span>
+      <span>Isi <strong>Qty Total</strong> → pilih event <strong>BOM Released</strong> → klik <strong>💾 Save to Supabase</strong></span>
     </div>
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px;background:color-mix(in srgb,#f59e0b 10%,var(--bg));border:1px solid color-mix(in srgb,#f59e0b 25%,transparent);border-radius:4px;padding:6px 8px;margin-top:2px">
       <span style="font-size:14px">⚠️</span>
@@ -2554,7 +2554,7 @@ body::before{
     </div>
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px">
       <span style="min-width:20px;text-align:center;font-weight:700;color:var(--prd);font-family:var(--mono)">4</span>
-      <span>Klik <strong>💾 Save to Sheets</strong></span>
+      <span>Klik <strong>💾 Save to Supabase</strong></span>
     </div>
   </div>
 </div>
@@ -2585,7 +2585,7 @@ body::before{
     </div>
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px">
       <span style="min-width:20px;text-align:center;font-weight:700;color:var(--qc);font-family:var(--mono)">4</span>
-      <span>Klik <strong>💾 Save to Sheets</strong></span>
+      <span>Klik <strong>💾 Save to Supabase</strong></span>
     </div>
   </div>
 </div>
@@ -2608,7 +2608,7 @@ body::before{
     </div>
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px">
       <span style="min-width:20px;text-align:center;font-weight:700;color:var(--acc);font-family:var(--mono)">3</span>
-      <span>Pilih event <strong>Delivered</strong> → Pilih User → klik <strong>💾 Save to Sheets</strong></span>
+      <span>Pilih event <strong>Delivered</strong> → Pilih User → klik <strong>💾 Save to Supabase</strong></span>
     </div>
   </div>
 </div>
@@ -2630,7 +2630,7 @@ body::before{
     </div>
     <div style="display:flex;gap:8px;align-items:flex-start;font-size:11px">
       <span style="font-size:14px">☁️</span>
-      <span>Untuk data terbaru dari semua divisi: <strong>⚙️ Settings → ☁️ Load from Sheets</strong></span>
+      <span>Untuk data terbaru dari semua divisi: <strong>⚙️ Settings → ☁️ Load from Supabase</strong></span>
     </div>
   </div>
 </div>
@@ -2641,7 +2641,7 @@ body::before{
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px">
     <div style="display:flex;gap:6px"><span>📷</span><span>Scan QR dengan kamera HP → otomatis isi form semua divisi</span></div>
     <div style="display:flex;gap:6px"><span>📥</span><span>Tombol <strong>Local</strong> = simpan offline tanpa internet</span></div>
-    <div style="display:flex;gap:6px"><span>☁️</span><span><strong>Load from Sheets</strong> di Settings untuk sync data terbaru</span></div>
+    <div style="display:flex;gap:6px"><span>☁️</span><span><strong>Load from Supabase</strong> di Settings untuk sync data terbaru</span></div>
     <div style="display:flex;gap:6px"><span>⌨️</span><span>Tekan <strong>/</strong> untuk fokus ke scan input, <strong>?</strong> untuk shortcuts</span></div>
   </div>
 </div>
@@ -2846,7 +2846,7 @@ body::before{
     <div class="plw-icon">🏷️</div>
     <div class="plw-content">
       <div class="plw-title">JANGAN LUPA PRINT QR CODE!</div>
-      <div class="plw-msg">Setelah Save ke Sheets atau Local — <strong>langsung Print QR Code</strong> dari panel kanan atau tombol 🖨️ di QR Finder. QR Code wajib ada sebelum WS turun ke Engineering.</div>
+      <div class="plw-msg">Setelah Save ke Supabase atau Local — <strong>langsung Print QR Code</strong> dari panel kanan atau tombol 🖨️ di QR Finder. QR Code wajib ada sebelum WS turun ke Engineering.</div>
     </div>
   </div>
   <div class="plw-tape plw-tape-bot"><div class="plw-tape-inner"></div><span class="plw-tape-text">🖨️ PRINT QR CODE 🖨️ PRINT QR CODE 🖨️ PRINT QR CODE 🖨️ PRINT QR CODE 🖨️ PRINT QR CODE 🖨️</span></div>
@@ -3145,7 +3145,7 @@ body::before{
 </div>
 <div class="field" style="margin-bottom:8px"><label>Remarks</label><textarea id="eng-remarks" placeholder="Catatan teknis, revisi, nomor drawing..."></textarea></div>
 <div class="brow">
-<button class="btn btn-p" style="background:var(--eng);color:#fff" onclick="saveEvent('Engineering')">💾 Save to Sheets</button>
+<button class="btn btn-p" style="background:var(--eng);color:#fff" onclick="saveEvent('Engineering')">💾 Save to Supabase</button>
 <button class="btn btn-s" onclick="saveLocal('Engineering')">📥 Local</button>
 </div>
 <div id="status-Engineering" class="smsg"></div>
@@ -3203,7 +3203,7 @@ body::before{
 <div class="field"><label>Remarks</label><textarea id="ppic-remarks" placeholder="Catatan planning..."></textarea></div>
 </div>
 <div class="brow">
-<button class="btn btn-p" style="background:var(--ppic);color:#fff" onclick="saveEvent('PPIC')">💾 Save to Sheets</button>
+<button class="btn btn-p" style="background:var(--ppic);color:#fff" onclick="saveEvent('PPIC')">💾 Save to Supabase</button>
 <button class="btn btn-s" onclick="saveLocal('PPIC')">📥 Local</button>
 </div>
 <div id="status-PPIC" class="smsg"></div>
@@ -3221,7 +3221,7 @@ body::before{
 <!-- Warning: shown until PPIC Info is saved -->
 <div id="ppic-mat-gate-warn" style="display:none;margin-bottom:10px;padding:10px 14px;background:color-mix(in srgb,#f59e0b 12%,var(--card));border:1.5px solid #f59e0b;border-radius:7px;font-size:12px;color:var(--warn-t);font-family:var(--mono)">
   ⚠️ <strong>PPIC Info belum disimpan ke Sheets.</strong><br>
-  <span style="font-size:11px;font-weight:400">Klik "💾 Save to Sheets" di bagian PPIC Info terlebih dahulu, baru isi list material di sini.</span>
+  <span style="font-size:11px;font-weight:400">Klik "💾 Save to Supabase" di bagian PPIC Info terlebih dahulu, baru isi list material di sini.</span>
 </div>
 <div class="mat-wrap"><div id="ppicMatList"><div style="padding:14px;text-align:center;font-size:11px;color:var(--faint)">Belum ada material. Klik "+ Tambah Item".</div></div></div>
 <div style="display:flex;gap:6px;margin-top:8px">
@@ -3354,7 +3354,7 @@ body::before{
 </table>
 </div>
 <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-<button class="btn btn-green" style="font-size:13px;font-weight:700;padding:7px 16px" onclick="saveRoutingToSheets()">💾 Save Routing to Sheets</button>
+<button class="btn btn-green" style="font-size:13px;font-weight:700;padding:7px 16px" onclick="saveRoutingToSheets()">💾 Save Routing to Supabase</button>
 <button class="btn btn-s" style="font-size:11px;color:var(--prd);border-color:var(--prd)" onclick="addRoutingRow()">+ Add Row</button>
 <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">WS + semua step → Sheet "RoutingProcess"</span>
 </div>
@@ -3511,7 +3511,7 @@ body::before{
 </div>
 
 <div class="brow">
-<button class="btn btn-p" style="background:var(--prd);color:#000" onclick="saveEvent('Production')">💾 Save to Sheets</button>
+<button class="btn btn-p" style="background:var(--prd);color:#000" onclick="saveEvent('Production')">💾 Save to Supabase</button>
 <button class="btn btn-s" onclick="saveLocal('Production')">📥 Local</button>
 <button class="btn btn-s" style="color:#8b5cf6;border-color:#8b5cf6" onclick="printAssyPartsLog()">🖨️ Print Assy Parts</button>
 </div>
@@ -3607,7 +3607,7 @@ body::before{
 <div class="field"><label>Remarks / Defect Notes</label><textarea id="qc-remarks" placeholder="Deskripsi defect..."></textarea></div>
 </div>
 <div class="brow">
-<button class="btn btn-p" style="background:var(--qc);color:#000" onclick="saveEvent('QC')">💾 Save to Sheets</button>
+<button class="btn btn-p" style="background:var(--qc);color:#000" onclick="saveEvent('QC')">💾 Save to Supabase</button>
 <button class="btn btn-s" onclick="saveLocal('QC')">📥 Local</button>
 </div>
 <div id="status-QC" class="smsg"></div>
@@ -3646,7 +3646,7 @@ body::before{
 </div>
 <div class="field" style="margin-bottom:8px"><label>Delivery Remarks</label><textarea id="acc-remarks" placeholder="Surat jalan No., kendaraan, driver, alasan tolak..."></textarea></div>
 <div class="brow">
-<button class="btn btn-p" style="background:var(--acc);color:#fff" onclick="saveAccounting()">💾 Save to Sheets</button>
+<button class="btn btn-p" style="background:var(--acc);color:#fff" onclick="saveAccounting()">💾 Save to Supabase</button>
 <button class="btn btn-s" onclick="saveLocal('Accounting')">📥 Local</button>
 </div>
 <div id="status-Accounting" class="smsg"></div>
@@ -4584,15 +4584,15 @@ function addPpicMatRow(d={}){
 const ppicWsGate=($i('ppic-noWs')?.value||'').trim();
 if(!ppicWsGate){
   const msg=$i('ppic-mat-msg');
-  if(msg){msg.textContent='⚠️ Scan NO_WS dan Save PPIC Info ke Sheets dulu!';msg.className='smsg err';}
+  if(msg){msg.textContent='⚠️ Scan NO_WS dan Save PPIC Info ke Supabase dulu!';msg.className='smsg err';}
   if(typeof showToast==='function') showToast('Scan WS dan Save PPIC Info dulu!','warn');
   return;
 }
 const hasPpicEvt=evs().some(r=>r.department==='PPIC'&&String(r.no_ws||'').trim()===ppicWsGate);
 if(!hasPpicEvt){
   const msg=$i('ppic-mat-msg');
-  if(msg){msg.innerHTML='⚠️ <strong>Save PPIC Info ke Sheets dulu</strong> sebelum tambah material.<br><span style="font-size:11px">Klik "💾 Save to Sheets" di bagian PPIC Info.</span>';msg.className='smsg err';}
-  if(typeof showToast==='function') showToast('⚠️ Save PPIC Info ke Sheets dulu!','warn');
+  if(msg){msg.innerHTML='⚠️ <strong>Save PPIC Info ke Supabase dulu</strong> sebelum tambah material.<br><span style="font-size:11px">Klik "💾 Save to Supabase" di bagian PPIC Info.</span>';msg.className='smsg err';}
+  if(typeof showToast==='function') showToast('⚠️ Save PPIC Info ke Supabase dulu!','warn');
   return;
 }
 const id='m'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
@@ -4636,11 +4636,11 @@ function savePpicMat(){
 /* ── Gate: PPIC info (BOM event) must be saved first ── */
 const ppicWs=($i('ppic-noWs')?.value||'').trim();
 if(!ppicWs){const m=$i('ppic-mat-msg');
-m.textContent='⚠️ Scan NO_WS dan Save PPIC Info ke Sheets dulu sebelum simpan material!';
+m.textContent='⚠️ Scan NO_WS dan Save PPIC Info ke Supabase dulu sebelum simpan material!';
 m.className='smsg err';return;}
 const hasPpicEvent=evs().some(r=>r.department==='PPIC'&&String(r.no_ws||'').trim()===ppicWs);
 if(!hasPpicEvent){const m=$i('ppic-mat-msg');
-m.innerHTML='⚠️ <strong>PPIC Info belum disimpan ke Sheets!</strong><br><span style="font-size:11px">Klik "💾 Save to Sheets" di atas terlebih dahulu, baru isi list material.</span>';
+m.innerHTML='⚠️ <strong>PPIC Info belum disimpan ke Supabase!</strong><br><span style="font-size:11px">Klik "💾 Save to Supabase" di atas terlebih dahulu, baru isi list material.</span>';
 m.className='smsg err';
 if(typeof showToast==='function') showToast('⚠️ Save PPIC Info dulu sebelum isi material!','warn');
 return;}
@@ -5572,7 +5572,7 @@ async function saveRoutingToSheets(){
     return;
   }
   if(m){m.textContent=`✓ Routing ${noWs} tersimpan! ${ok}/${rows.length} step → Sheet "RoutingProcess"${fail>0?' ('+fail+' gagal)':''}`;m.className=fail>0?'smsg warn':'smsg ok';}
-  if(typeof showToast==='function') showToast(`✓ Routing ${noWs} → Sheets (${ok} step)`,'ok');
+  if(typeof showToast==='function') showToast(`✓ Routing ${noWs} → Supabase (${ok} step)`,'ok');
   const savedBadge=$i('prd-routing-sync-saved-badge');if(savedBadge) savedBadge.style.display='inline';
   updateRoutingGuidelineBar();
   renderPrdEventsLog(noWs);
@@ -5755,7 +5755,7 @@ renderTimeline();
 if(typeof updateSbWsCount==='function') updateSbWsCount();
 if(document.getElementById('view-dashboard')?.classList.contains('active')) renderDashboard();
 const b=$i('cfgMsg');
-b.textContent='✓ Synced '+merged.length+' events ('+sheetRows.length+' dari Sheets).';
+b.textContent='✓ Synced '+merged.length+' events ('+sheetRows.length+' dari Supabase).';
 b.className='smsg ok';
 if(typeof showToast==='function') showToast('Sync dari Sheets: '+sheetRows.length+' events ✓','ok');}
 catch(e){const b=$i('cfgMsg');b.textContent='✗ '+e.message;b.className='smsg err';}}
@@ -5785,7 +5785,7 @@ if(d==='Marketing'&&fileData.draw.fileName) saveDrawingLocally(p.no_ws,p.custome
 if(d==='Marketing'&&ppicMatRows.length) savePpicMat();
 const rows=evs();rows.push(p);saveEvs(rows);
 /* ── DEFERRED UI UPDATE: don't block the save response ── */
-setMsg(d,'✓ Saved! (sync ke Sheets...)','ok');
+setMsg(d,'✓ Saved! (sync ke Supabase...)','ok');
 requestAnimationFrame(()=>{
   renderTimeline();
   if(d==='Marketing') setTimeout(renderQrFinderList,50);
@@ -5834,7 +5834,7 @@ if(d==='QC'){
             setMsg(d,`✓ Supabase: ${qcWsStr} + ${childWsList.length} child WS ✓`);
             if(typeof showToast==='function') showToast('QC Assembling sync selesai — '+childWsList.length+' child ✓','ok');
           }catch(e){
-            setMsg(d,'✓ Local OK — Supabase partial: '+e.message,'warn');
+            setMsg(d,'✓ Local OK — Supabase error: '+e.message,'warn');
           }
         })();
       return; /* skip the generic GAS push below */
@@ -5845,7 +5845,7 @@ if(d==='QC'){
 const cfg=JSON.parse(localStorage.getItem(CK)||'{}');
 if(true){/* Supabase always available */
   postToSheets(p).then(()=>{
-    setMsg(d,'✓ Saved to Sheets ✓');
+    setMsg(d,'✓ Saved to Supabase ✓');
     /* After PPIC save — unlock material list */
     if(d==='PPIC') setTimeout(ppicMatGateUpdate,100);
   }).catch(e=>{
@@ -5853,7 +5853,7 @@ if(true){/* Supabase always available */
     if(d==='PPIC') setTimeout(ppicMatGateUpdate,100);
   });
 } else {
-  setMsg(d,'✓ Saved locally (offline mode).','warn');
+  setMsg(d,'✓ Saved locally (akan sync ke Supabase saat online).','warn');
   if(d==='PPIC') setTimeout(ppicMatGateUpdate,100);
 }}
 function validateProductionLocal(){const msgs=[];
@@ -5904,7 +5904,7 @@ if(fileData.sj.fileName&&p.no_ws){
 const st=sjSt();st[p.no_ws+'_'+Date.now()]={filename:fileData.sj.fileName,thumbnail:fileData.sj.thumbnail,isImage:fileData.sj.isImage,customer:p.customer,no_ws:p.no_ws,no_po:p.no_po,parsial:p.parsial,qty:p.qty,ts:p.ts};
 try{saveSjSt(st);}catch(e){console.warn('SJ store failed',e);}}
 setMsg('Accounting','⏳...','info');
-try{await postToSheets(p);const rows=evs();rows.push(p);saveEvs(rows);renderTimeline();setMsg('Accounting','✓ Saved!');}
+try{await postToSheets(p);const rows=evs();rows.push(p);saveEvs(rows);renderTimeline();setMsg('Accounting','✓ Saved to Supabase!');}
 catch(e){setMsg('Accounting','✗ '+e.message,'err');}}
 function saveDrawingLocally(ws,customer,part){if(!ws) return;
 const st=drawSt();
