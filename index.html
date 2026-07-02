@@ -2926,9 +2926,22 @@ body::before{
 <!-- ═══ ROUTING PROCESS TABLE (Marketing) ═══ -->
 <!-- ═══ ROUTING PROCESS TABLE ═══ -->
 <div class="sc" id="mkt-routing-panel" style="border-color:color-mix(in srgb,var(--mkt) 30%,transparent)">
-<h3 style="color:var(--mkt)">🗂️ Routing Process <span id="mkt-routing-ws-badge" style="font-weight:400;color:var(--muted);font-size:10px"></span></h3>
+<h3 style="color:var(--mkt)">🗂️ Routing Process <span id="mkt-routing-ws-badge" style="font-weight:400;color:var(--muted);font-size:10px"></span> <span id="mkt-routing-sync-saved-badge" style="display:none;font-size:9px;background:#16a34a22;color:#16a34a;border:1px solid #16a34a44;padding:1px 6px;border-radius:3px;font-family:var(--mono)">✓ Saved</span></h3>
 <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px;padding:6px 9px;background:color-mix(in srgb,var(--mkt) 6%,var(--card));border-radius:4px;border-left:2px solid var(--mkt)">
-  📋 Routing process per WS — guideline untuk Production Data. User: <strong style="color:#facc15">Agus</strong>
+  📋 Routing process per WS — planning untuk proses produksi. User: <strong style="color:#facc15">Agus</strong>
+</div>
+<!-- ── SCAN BAR untuk Routing ── -->
+<div class="scan-bar" style="margin-bottom:12px;border-color:color-mix(in srgb,var(--mkt) 40%,transparent)">
+<div class="scan-bar-title" style="color:var(--mkt)">📡 SCAN QR / NO_WS untuk Routing</div>
+<div class="scan-bar-row">
+<input class="scan-input" id="scan-mkt-routing" placeholder="Scan atau ketik NO_WS..." 
+  onkeydown="if(event.key==='Enter') processScanRouting(this.value)">
+<button class="btn btn-blue" onclick="processScanRouting(document.getElementById('scan-mkt-routing').value)">🔍</button>
+<button class="btn btn-s cam-scan-btn" onclick="openCamScan('mkt-routing')" title="Scan QR dengan kamera">📷</button>
+</div>
+<div class="scan-result" id="sresult-mkt-routing">
+  <div class="sdata" id="sdata-mkt-routing"></div>
+</div>
 </div>
 <!-- ── Jumlah Routing Selector ── -->
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:color-mix(in srgb,var(--mkt) 5%,var(--card));border-radius:5px;border:1px solid color-mix(in srgb,var(--mkt) 20%,transparent)">
@@ -2970,7 +2983,11 @@ body::before{
 <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
 <button class="btn btn-green" style="font-size:13px;font-weight:700;padding:7px 16px" onclick="saveRoutingToSheets()">💾 Save Routing to Supabase</button>
 <button class="btn btn-s" style="font-size:11px;color:var(--mkt);border-color:var(--mkt)" onclick="addRoutingRow()">+ Add Row</button>
-<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">WS + semua step → Sheet "RoutingProcess"</span>
+<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">WS + semua step → Supabase (routing_process)</span>
+</div>
+<div id="mkt-routing-sync-bar" style="display:none;margin-bottom:8px;padding:7px 10px;background:color-mix(in srgb,var(--mkt) 6%,var(--card));border-radius:5px;border:1px solid color-mix(in srgb,var(--mkt) 20%,transparent)">
+<div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:4px">ROUTING STEPS:</div>
+<div id="mkt-routing-sync-steps" style="display:flex;flex-wrap:wrap;gap:4px"></div>
 </div>
 <div id="mkt-routing-msg" class="smsg" style="margin-top:7px"></div>
 </div>
@@ -3363,68 +3380,13 @@ body::before{
 <div id="prd-ev-warn" style="display:none;margin-top:7px" class="smsg err"></div>
 <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><span style="font-size:9px;color:var(--muted);font-family:var(--mono)">STATUS →</span><div class="sbadge" id="badge-Production" style="--accent:var(--prd)">IN_PRODUCTION</div></div>
 </div>
-<!-- ═══ ROUTING PROCESS TABLE ═══ -->
-<div class="sc" id="prd-routing-panel" style="border-color:color-mix(in srgb,var(--prd) 30%,transparent)">
-<h3 style="color:var(--prd)">🗂️ Routing Process <span id="prd-routing-ws-badge" style="font-weight:400;color:var(--muted);font-size:10px"></span></h3>
-<div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px;padding:6px 9px;background:color-mix(in srgb,var(--prd) 6%,var(--card));border-radius:4px;border-left:2px solid var(--prd)">
-  📋 Routing process per WS — guideline untuk Production Data. User: <strong style="color:#facc15">WAHYUDI</strong>
-</div>
-<!-- ── Jumlah Routing Selector ── -->
-<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:color-mix(in srgb,var(--prd) 5%,var(--card));border-radius:5px;border:1px solid color-mix(in srgb,var(--prd) 20%,transparent)">
-<span style="font-size:12px;font-family:var(--mono);color:var(--muted);white-space:nowrap">Jumlah Routing:</span>
-<select id="prd-routing-count-sel" class="mat-sel" style="max-width:90px;font-size:14px;font-weight:700" onchange="handleRoutingCountChange(this)">
-<option value="0">— Pilih</option>
-<option value="1">1</option><option value="2">2</option><option value="3">3</option>
-<option value="4">4</option><option value="5">5</option><option value="6">6</option>
-<option value="7">7</option><option value="8">8</option><option value="9">9</option>
-<option value="10">10</option>
-<option value="custom">Custom...</option>
-</select>
-<div id="prd-routing-custom-row" style="display:none;align-items:center;gap:6px">
-  <input id="prd-routing-custom-inp" type="number" min="11" max="200" placeholder="11–200"
-    style="width:72px;padding:5px 7px;background:var(--inp);border:1.5px solid var(--prd);border-radius:4px;color:var(--text);font-size:13px;font-family:var(--mono);font-weight:700;outline:none"
-    oninput="applyCustomRoutingCount(this.value)">
-  <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">max 200</span>
-</div>
-<span style="font-size:11px;color:var(--faint);font-family:var(--mono)">step routing per WS</span>
-<button class="btn btn-s" style="font-size:11px;color:#8b5cf6;border-color:#8b5cf6;margin-left:auto" onclick="autoFillRoutingFromType()">⚡ Auto-fill</button>
-<button class="btn btn-s" style="font-size:11px" onclick="clearRoutingRows()">🗑 Clear</button>
-<span style="font-size:10px;color:var(--faint);font-family:var(--mono)" id="prd-routing-count"></span>
-</div>
-<!-- Routing Table -->
-<div class="mat-wrap" style="margin-bottom:10px">
-<table class="mat-table" id="prd-routing-table" style="min-width:620px">
-<thead><tr>
-<th style="width:36px">No</th>
-<th style="min-width:110px">NO_WS / Part</th>
-<th style="min-width:190px">Process / Operation <span style="color:#ef4444">*</span></th>
-<th style="min-width:110px">Est. Durasi <span style="color:#ef4444">*</span></th>
-<th style="min-width:120px">Status</th>
-</tr></thead>
-<tbody id="prd-routing-tbody">
-<tr><td colspan="5" style="text-align:center;padding:18px;font-size:12px;color:var(--faint)">Pilih jumlah routing di atas atau scan WS terlebih dahulu.</td></tr>
-</tbody>
-</table>
-</div>
-<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-<button class="btn btn-green" style="font-size:13px;font-weight:700;padding:7px 16px" onclick="saveRoutingToSheets()">💾 Save Routing to Supabase</button>
-<button class="btn btn-s" style="font-size:11px;color:var(--prd);border-color:var(--prd)" onclick="addRoutingRow()">+ Add Row</button>
-<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">WS + semua step → Sheet "RoutingProcess"</span>
-</div>
-<div id="prd-routing-msg" class="smsg" style="margin-top:7px"></div>
+
 </div>
 
 <div class="sc">
 <div class="val-warn" id="prd-vw"></div>
 <h3>Production Data</h3>
-<!-- ── ROUTING GUIDELINE BAR (auto-sync, read-only) ── -->
-<div id="prd-routing-sync-bar" style="display:none;margin-bottom:10px;padding:8px 12px;background:color-mix(in srgb,var(--prd) 7%,var(--card));border:1px solid color-mix(in srgb,var(--prd) 30%,transparent);border-radius:5px">
-<div style="font-size:10px;font-family:var(--mono);color:var(--prd);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;display:flex;align-items:center;gap:6px">
-  🗂️ Routing Process Guideline <span style="font-size:9px;color:var(--muted);font-weight:400;letter-spacing:.3px">(auto-sync dari Routing Table)</span>
-  <span id="prd-routing-sync-saved-badge" style="display:none;margin-left:auto;font-size:9px;font-family:var(--mono);background:color-mix(in srgb,#10b981 15%,transparent);border:1px solid color-mix(in srgb,#10b981 30%,transparent);color:#10b981;padding:1px 7px;border-radius:3px">✅ SAVED TO SHEETS</span>
-</div>
-<div id="prd-routing-sync-steps" style="display:flex;flex-wrap:wrap;gap:5px;pointer-events:none;user-select:none"></div>
-</div>
+
 <!-- WS Type Selector -->
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:9px 12px;background:var(--card);border:1px solid var(--border2);border-radius:7px">
 <span style="font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Tipe WS:</span>
@@ -4417,13 +4379,13 @@ function updateMobileNav(el){
 
 /* addRoutingRow — manually add 1 routing row */
 function addRoutingRow(){
-  const noWs=$i('prd-noWs')?.value||'';
+  const noWs=getRoutingWs();
   const id='rr'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
   routingRows.push({id,ws:noWs,op:'',dur:'',status:'IN PROGRESS'});
   syncRoutingSel(routingRows.length);
   renderRoutingTable();updateRoutingCount();
   /* Scroll routing table to bottom so new row is visible */
-  const tbl=document.getElementById('prd-routing-table');
+  const tbl=document.getElementById('mkt-routing-table');
   if(tbl) tbl.scrollIntoView({block:'end',behavior:'smooth'});
 }
 function openModal(id){$i(id).classList.add('open');}
@@ -5065,6 +5027,26 @@ $i('ppic-type-sync-badge').style.cssText='padding:3px 10px;border-radius:12px;fo
 const SF={Engineering:['eng-noWs','eng-customer','eng-noPo','eng-deadline','eng-part'],PPIC:['ppic-noWs','ppic-customer','ppic-noPo','ppic-deadline','ppic-part'],Production:['prd-noWs','prd-customer',null,null,'prd-part'],QC:['qc-noWs','qc-customer',null,null,'qc-part'],Accounting:['acc-noWs','acc-customer','acc-noPo',null,'acc-part']
 };
 function processScan(dept){const inp=$i('scan-'+dept); const ws=inp.value.trim(); if(!ws) return;
+/* ── AUTO-SYNC: fetch latest events for this WS from Supabase ── */
+(async()=>{
+  try{
+    const r=await fetch(SUPA_URL+'/rest/v1/events?select=*&no_ws=eq.'+encodeURIComponent(ws)+'&order=ts.asc',
+      {headers:{apikey:SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    if(r.ok){
+      const rows=await r.json();
+      if(rows&&rows.length){
+        const local=evs();
+        const localKeys=new Set(local.map(e=>e.no_ws+'||'+e.ts));
+        const newRows=rows.filter(r=>r.no_ws&&!localKeys.has(r.no_ws+'||'+(r.ts||'')));
+        if(newRows.length){
+          const merged=[...local,...newRows].sort((a,b)=>(a.ts||'').localeCompare(b.ts||''));
+          saveEvs(merged);
+          if(typeof renderTimeline==='function') requestAnimationFrame(renderTimeline);
+        }
+      }
+    }
+  }catch(e){/* silent fail - offline OK */}
+})();
 const events=evs();
 const baseWs=ws.replace(/-\d+$/,'');
 const mkt=events.find(r=>r.no_ws===ws&&r.department==='Marketing')||events.find(r=>r.no_ws===ws)||events.find(r=>r.no_ws===baseWs&&r.department==='Marketing')||events.find(r=>r.no_ws===baseWs);
@@ -5098,20 +5080,16 @@ if(dept==='Production') autoFillSTFromPpic(ws);
 if(dept==='Production') renderPrdMatItems(ws);
 if(dept==='Production') setTimeout(()=>autoDetectPrdType(),50);
 if(dept==='Production'){
-  routingRows=[];
-  const _hadSaved=loadRoutingForWs(ws);
-  if(!_hadSaved){renderRoutingTable();updateRoutingCount();}
-  updateRoutingGuidelineBar();
-  const rb=$i('prd-routing-ws-badge');if(rb)rb.textContent='· WS: '+ws;
-  const sb=$i('prd-routing-sync-saved-badge');
-  if(sb){const _rSt=getRoutingSt()[ws];sb.style.display=(_rSt&&_rSt.saved_to_sheets)?'inline':'none';}
-  syncRoutingSel(routingRows.length||0);
   setTimeout(()=>renderPrdEventsLog(ws),80);
 }
-/* ── Marketing routing panel: update WS badge when scanned ── */
+/* ── Marketing routing panel: update WS badge + load routing ── */
 if(dept==='Marketing'){
   const mktRb=$i('mkt-routing-ws-badge');
   if(mktRb) mktRb.textContent='· WS: '+ws;
+  routingRows=[];
+  const _hadSaved=loadRoutingForWs(ws);
+  if(!_hadSaved){renderRoutingTable();updateRoutingCount();}
+  syncRoutingSel(routingRows.length||0);
   const mktSb=$i('mkt-routing-sync-saved-badge');
   if(mktSb){const _rSt=getRoutingSt()[ws];mktSb.style.display=(_rSt&&_rSt.saved_to_sheets)?'inline':'none';}
 }
@@ -5380,14 +5358,14 @@ function saveRoutingSt(d){localStorage.setItem(RTK,JSON.stringify(d));}
 
 /* ── setRoutingCount: called when number selector changes ── */
 function syncRoutingSel(n){
-  const sel=$i('prd-routing-count-sel');
-  const customRow=$i('prd-routing-custom-row');
+  const sel=$i('mkt-routing-count-sel');
+  const customRow=$i('mkt-routing-custom-row');
   if(!sel) return;
   if(n<=10){sel.value=n||0;if(customRow)customRow.style.display='none';}
-  else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('prd-routing-custom-inp');if(ci)ci.value=n;}}
+  else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('mkt-routing-custom-inp');if(ci)ci.value=n;}}
 }
 function handleRoutingCountChange(sel){
-  const customRow=$i('prd-routing-custom-row');
+  const customRow=$i('mkt-routing-custom-row');
   if(sel.value==='custom'){
     if(customRow) customRow.style.display='flex';
     /* Don't change rows yet — wait for user to type */
@@ -5402,7 +5380,7 @@ function applyCustomRoutingCount(val){
   setRoutingCount(n);
 }
 function setRoutingCount(n){
-  const noWs=$i('prd-noWs')?.value||'';
+  const noWs=getRoutingWs();
   if(isNaN(n)||n<1){routingRows=[];renderRoutingTable();updateRoutingCount();return;}
   /* Preserve existing rows, only grow/shrink */
   while(routingRows.length<n){
@@ -5417,12 +5395,12 @@ function setRoutingCount(n){
 function delRoutingRow(id){
   routingRows=routingRows.filter(r=>r.id!==id);
   /* Sync selector */
-  const sel=$i('prd-routing-count-sel');
-  const customRow=$i('prd-routing-custom-row');
+  const sel=$i('mkt-routing-count-sel');
+  const customRow=$i('mkt-routing-custom-row');
   if(sel){
     const n=routingRows.length;
     if(n<=10){sel.value=n||0;if(customRow)customRow.style.display='none';}
-    else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('prd-routing-custom-inp');if(ci)ci.value=n;}}
+    else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('mkt-routing-custom-inp');if(ci)ci.value=n;}}
   }
   renderRoutingTable();updateRoutingCount();
 }
@@ -5433,12 +5411,12 @@ function rrSet(id,field,val){
 function clearRoutingRows(){
   if(routingRows.length&&!confirm('Clear semua routing rows?')) return;
   routingRows=[];
-  const sel=$i('prd-routing-count-sel');if(sel) sel.value=0;
-  const customRow=$i('prd-routing-custom-row');if(customRow)customRow.style.display='none';
+  const sel=$i('mkt-routing-count-sel');if(sel) sel.value=0;
+  const customRow=$i('mkt-routing-custom-row');if(customRow)customRow.style.display='none';
   renderRoutingTable();updateRoutingCount();
 }
 function updateRoutingCount(){
-  const el=$i('prd-routing-count');
+  const el=$i('mkt-routing-count');
   if(el) el.textContent=routingRows.length?routingRows.length+' step':'';
 }
 
@@ -5461,11 +5439,79 @@ function parseRoutingDurToHours(dur){
   return 0;
 }
 
+/* ══ ROUTING HELPER — all routing is now in Marketing tab ══ */
+function getRoutingEl(id){return document.getElementById(id);}
+
+/* Get routing WS from badge OR scan input */
+function getRoutingWs(){
+  const badge=$i('mkt-routing-ws-badge');
+  const txt=(badge?.textContent||'').replace('· WS:','').trim();
+  return txt||$i('scan-mkt-routing')?.value?.trim()||'';
+}
+function getRoutingMsgEl(){return $i('mkt-routing-msg');}
+
+/* Scan WS for routing panel */
+function processScanRouting(ws){
+  ws=(ws||'').trim().toUpperCase();
+  const inp=$i('scan-mkt-routing');
+  if(inp) inp.value=ws;
+  if(!ws){
+    const m=$i('mkt-routing-msg');
+    if(m){m.textContent='⚠️ Masukkan NO_WS terlebih dahulu.';m.className='smsg warn';}
+    return;
+  }
+  /* Update badge */
+  const badge=$i('mkt-routing-ws-badge');
+  if(badge) badge.textContent='· WS: '+ws;
+  /* Show scan result */
+  const res=$i('sresult-mkt-routing');
+  const dataEl=$i('sdata-mkt-routing');
+  /* Load existing routing for this WS */
+  routingRows=[];
+  const hadSaved=loadRoutingForWs(ws);
+  if(!hadSaved){renderRoutingTable();updateRoutingCount();}
+  /* Auto-sync from Supabase for this WS */
+  (async()=>{
+    try{
+      const r=await fetch(SUPA_URL+'/rest/v1/events?select=*&no_ws=eq.'+encodeURIComponent(ws)+'&order=ts.asc',
+        {headers:{apikey:SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+      if(r.ok){
+        const rows=await r.json();
+        if(rows&&rows.length){
+          const local=evs();
+          const keys=new Set(local.map(e=>e.no_ws+'||'+e.ts));
+          const newR=rows.filter(r=>r.no_ws&&!keys.has(r.no_ws+'||'+(r.ts||'')));
+          if(newR.length){
+            saveEvs([...local,...newR].sort((a,b)=>(a.ts||'').localeCompare(b.ts||'')));
+          }
+          /* Show WS info */
+          const ev=rows.find(r=>r.department==='Marketing')||rows[0];
+          if(dataEl&&ev){
+            dataEl.innerHTML='<div class="sfield"><label>NO_WS</label><span>'+ws+'</span></div>'
+              +'<div class="sfield"><label>Customer</label><span>'+(ev.customer||'—')+'</span></div>'
+              +'<div class="sfield"><label>Part</label><span>'+(ev.part||'—')+'</span></div>'
+              +'<div class="sfield"><label>WS Type</label><span>'+(ev.ws_type||'—')+'</span></div>';
+          }
+          if(res) res.classList.add('visible');
+        }
+      }
+    }catch(e){console.warn('Routing scan sync error:',e);}
+  })();
+  syncRoutingSel(routingRows.length||0);
+  /* Update saved badge */
+  const sb=$i('mkt-routing-sync-saved-badge');
+  if(sb){const st=getRoutingSt()[ws];sb.style.display=(st&&st.saved_to_sheets)?'inline':'none';}
+  const m=$i('mkt-routing-msg');
+  if(m){m.textContent='✓ WS '+ws+' loaded. Pilih jumlah routing.';m.className='smsg ok';}
+  /* Clear input */
+  if(inp) inp.value='';
+}
+
 function renderRoutingTable(){
-  const tb=$i('prd-routing-tbody');
+  const tb=$i('mkt-routing-tbody');
   if(!tb) return;
-  const noWs=$i('prd-noWs')?.value||'—';
-  const badge=$i('prd-routing-ws-badge');
+  const noWs=getRoutingWs();
+  const badge=$i('mkt-routing-ws-badge');
   if(badge) badge.textContent=noWs!=='—'?'· WS: '+noWs:'';
 
   if(!routingRows.length){
@@ -5538,12 +5584,30 @@ function renderRoutingTotalRow(){
 }
 
 function autoFillRoutingFromType(){
-  const noWs=$i('prd-noWs')?.value||'';
-  if(!noWs){const m=$i('prd-routing-msg');if(m){m.textContent='Scan WS dulu sebelum auto-fill.';m.className='smsg warn';}return;}
+  const noWs=getRoutingWs();
+  if(!noWs){const m=$i('mkt-routing-msg');if(m){m.textContent='Scan WS dulu sebelum auto-fill.';m.className='smsg warn';}return;}
   routingRows=[];
-  const wsType=typeof prdType!=='undefined'?prdType:'SINGLE';
+  /* Get WS type from Marketing event data for this WS */
+  const _mktEv=(typeof evs==='function'?evs():[]).filter(r=>r.no_ws===noWs&&r.department==='Marketing');
+  const _mktLast=_mktEv[_mktEv.length-1]||{};
+  const wsType=_mktLast.ws_type||'SINGLE';
+  /* For ASSEMBLING: get child WS list from assy_parts or ws_start/ws_end_suffix */
+  let assyParts=[];
   if(wsType==='ASSEMBLING'){
-    const parts=typeof assyPartRows!=='undefined'&&assyPartRows.length?assyPartRows:[{ws:noWs,partName:'Assembly'}];
+    try{
+      if(_mktLast.assy_parts) assyParts=JSON.parse(_mktLast.assy_parts);
+      else if(_mktLast.ws_start&&_mktLast.ws_end_suffix){
+        const m2=String(_mktLast.ws_start).match(/^(.+)-(\d+)$/);
+        if(m2){
+          const base=m2[1],sn=parseInt(m2[2]),en=parseInt(_mktLast.ws_end_suffix),pl=m2[2].length;
+          for(let n=sn;n<=en;n++) assyParts.push({ws:base+'-'+String(n).padStart(pl,'0'),partName:''});
+        }
+      }
+    }catch(e){}
+    if(!assyParts.length) assyParts=[{ws:noWs,partName:'Assembly'}];
+  }
+  if(wsType==='ASSEMBLING'){
+    const parts=assyParts;
     parts.forEach(p=>{
       const id='rr'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
       routingRows.push({id,ws:p.ws||p.partName||noWs,op:'ASSY',dur:'',status:'IN PROGRESS'});
@@ -5556,7 +5620,7 @@ function autoFillRoutingFromType(){
   }
   syncRoutingSel(routingRows.length);
   renderRoutingTable();updateRoutingCount();
-  const m=$i('prd-routing-msg');
+  const m=$i('mkt-routing-msg');
   if(m){m.textContent=`✓ Auto-filled ${routingRows.length} routing step untuk WS ${noWs}.`;m.className='smsg ok';}
 }
 
@@ -5564,7 +5628,7 @@ function autoFillRoutingFromType(){
 function validateRoutingRows(){
   /* Check both Marketing and Production routing panels */
   const mktBadge=($i('mkt-routing-ws-badge')?.textContent||'').replace('· WS:','').trim();
-  const prdNoWs=$i('prd-noWs')?.value||'';
+  const prdNoWs=getRoutingWs();
   const noWs=mktBadge||prdNoWs;
   if(!noWs) return 'Scan WS terlebih dahulu.';
   if(!routingRows.length) return 'Routing table kosong. Pilih jumlah routing dulu.';
@@ -5578,8 +5642,8 @@ function validateRoutingRows(){
 
 /* ── UPDATE ROUTING GUIDELINE BAR in Production Data ── */
 function updateRoutingGuidelineBar(){
-  const bar=$i('prd-routing-sync-bar');
-  const steps=$i('prd-routing-sync-steps');
+  const bar=$i('mkt-routing-sync-bar');
+  const steps=$i('mkt-routing-sync-steps');
   if(!bar||!steps) return;
   if(!routingRows.length){bar.style.display='none';return;}
   bar.style.display='block';
@@ -5596,23 +5660,17 @@ function updateRoutingGuidelineBar(){
 /* ── SAVE ROUTING TO SHEETS ── */
 async function saveRoutingToSheets(){
   const errMsg=validateRoutingRows();
-  /* Detect which panel is active - Marketing or Production */
-  const isMkt=document.getElementById('mkt-routing-panel')&&
-    document.getElementById('dept-Marketing')&&
-    document.getElementById('dept-Marketing').classList.contains('active');
-  const msgId=isMkt?'mkt-routing-msg':'prd-routing-msg';
-  const wsInputId=isMkt?'mkt-noWs':'prd-noWs';
+  /* Routing exclusively in Marketing — always use mkt IDs */
+  const msgId='mkt-routing-msg';
   if(errMsg){
     const m=$i(msgId);
     if(m){m.textContent='⚠️ '+errMsg;m.className='smsg err';}
     return;
   }
-  /* Get noWs from routing badge (set when WS scanned) */
-  const _badge=$i(isMkt?'mkt-routing-ws-badge':'prd-routing-ws-badge');
-  const _badgeTxt=(_badge?.textContent||'').replace('· WS:','').trim();
-  const noWs=_badgeTxt||($i('prd-noWs')?.value||'');
+  const noWs=getRoutingWs();
   const m=$i(msgId);
-  if(m){m.textContent='⏳ Menyimpan routing…';m.className='smsg info';}
+  if(m){m.textContent='⏳ Menyimpan routing ke Supabase…';m.className='smsg info';}
+
 
   /* Build rows dari routingRows global */
   const st=getRoutingSt();
@@ -5621,7 +5679,7 @@ async function saveRoutingToSheets(){
     ts:now, no_ws:noWs, routing_seq:idx+1,
     routing_ws_ref:r.ws||noWs, routing_op:r.op||'',
     routing_dur:r.dur||'', routing_status:r.status||'PENDING',
-    user:r.operator||'', department:isMkt?'Marketing':'Production',
+    user:r.operator||'', department:'Marketing',
     event:'Routing Process', saved_at:now
   }));
   if(!rows.length){
@@ -5647,7 +5705,7 @@ async function saveRoutingToSheets(){
   }
   if(m){m.textContent=`✓ Routing ${noWs} tersimpan! ${ok}/${rows.length} step → Sheet "RoutingProcess"${fail>0?' ('+fail+' gagal)':''}`;m.className=fail>0?'smsg warn':'smsg ok';}
   if(typeof showToast==='function') showToast(`✓ Routing ${noWs} → Supabase (${ok} step)`,'ok');
-  const savedBadge=$i('prd-routing-sync-saved-badge');if(savedBadge) savedBadge.style.display='inline';
+  const savedBadge=$i('mkt-routing-sync-saved-badge');if(savedBadge) savedBadge.style.display='inline';
   updateRoutingGuidelineBar();
   renderPrdEventsLog(noWs);
 }
@@ -5666,9 +5724,9 @@ function loadRoutingForWs(ws){
     }));
     syncRoutingSel(routingRows.length);
     renderRoutingTable();updateRoutingCount();
-    const savedBadge=$i('prd-routing-sync-saved-badge');
+    const savedBadge=$i('mkt-routing-sync-saved-badge');
     if(savedBadge) savedBadge.style.display=saved.saved_to_sheets?'inline':'none';
-    const msg=$i('prd-routing-msg');
+    const msg=$i('mkt-routing-msg');
     if(msg){msg.textContent=`✓ Loaded ${routingRows.length} routing step tersimpan untuk WS ${ws}.`;msg.className='smsg ok';}
     return true;
   }
@@ -9240,6 +9298,15 @@ window.useCamResult=function(){
       /* Set trackMode to 'ws' before doTrack */
       if(typeof trackMode==='undefined'||!trackMode) window.trackMode='ws';
       if(typeof doTrack==='function') doTrack();
+    },350);
+    return;
+  }
+
+  /* Special: mkt-routing camera scan → route to processScanRouting */
+  if(dept==='mkt-routing'){
+    closeCamScan();
+    setTimeout(function(){
+      if(typeof processScanRouting==='function') processScanRouting(ws);
     },350);
     return;
   }
