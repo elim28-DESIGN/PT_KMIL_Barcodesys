@@ -4379,7 +4379,7 @@ function updateMobileNav(el){
 
 /* addRoutingRow — manually add 1 routing row */
 function addRoutingRow(){
-  const noWs=getRoutingWs();
+  const noWs=$i('prd-noWs')?.value||'';
   const id='rr'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
   routingRows.push({id,ws:noWs,op:'',dur:'',status:'IN PROGRESS'});
   syncRoutingSel(routingRows.length);
@@ -5027,26 +5027,19 @@ $i('ppic-type-sync-badge').style.cssText='padding:3px 10px;border-radius:12px;fo
 const SF={Engineering:['eng-noWs','eng-customer','eng-noPo','eng-deadline','eng-part'],PPIC:['ppic-noWs','ppic-customer','ppic-noPo','ppic-deadline','ppic-part'],Production:['prd-noWs','prd-customer',null,null,'prd-part'],QC:['qc-noWs','qc-customer',null,null,'qc-part'],Accounting:['acc-noWs','acc-customer','acc-noPo',null,'acc-part']
 };
 function processScan(dept){const inp=$i('scan-'+dept); const ws=inp.value.trim(); if(!ws) return;
-/* ── AUTO-SYNC: fetch latest events for this WS from Supabase ── */
-(async()=>{
-  try{
-    const r=await fetch(SUPA_URL+'/rest/v1/events?select=*&no_ws=eq.'+encodeURIComponent(ws)+'&order=ts.asc',
-      {headers:{apikey:SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    if(r.ok){
-      const rows=await r.json();
-      if(rows&&rows.length){
-        const local=evs();
-        const localKeys=new Set(local.map(e=>e.no_ws+'||'+e.ts));
-        const newRows=rows.filter(r=>r.no_ws&&!localKeys.has(r.no_ws+'||'+(r.ts||'')));
-        if(newRows.length){
-          const merged=[...local,...newRows].sort((a,b)=>(a.ts||'').localeCompare(b.ts||''));
-          saveEvs(merged);
-          if(typeof renderTimeline==='function') requestAnimationFrame(renderTimeline);
-        }
-      }
+/* AUTO-SYNC: fetch latest events for this WS from Supabase */
+(async()=>{try{
+  const r=await fetch(SUPA_URL+'/rest/v1/events?select=*&no_ws=eq.'+encodeURIComponent(ws)+'&order=ts.asc',
+    {headers:{apikey:SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+  if(r.ok){const rows=await r.json();
+    if(rows&&rows.length){
+      const local=evs();const keys=new Set(local.map(e=>e.no_ws+'||'+e.ts));
+      const newR=rows.filter(r=>r.no_ws&&!keys.has(r.no_ws+'||'+(r.ts||'')));
+      if(newR.length){saveEvs([...local,...newR].sort((a,b)=>(a.ts||'').localeCompare(b.ts||'')));
+      if(typeof renderTimeline==='function') requestAnimationFrame(renderTimeline);}
     }
-  }catch(e){/* silent fail - offline OK */}
-})();
+  }
+}catch(e){}})();
 const events=evs();
 const baseWs=ws.replace(/-\d+$/,'');
 const mkt=events.find(r=>r.no_ws===ws&&r.department==='Marketing')||events.find(r=>r.no_ws===ws)||events.find(r=>r.no_ws===baseWs&&r.department==='Marketing')||events.find(r=>r.no_ws===baseWs);
@@ -5081,17 +5074,13 @@ if(dept==='Production') renderPrdMatItems(ws);
 if(dept==='Production') setTimeout(()=>autoDetectPrdType(),50);
 if(dept==='Production'){
   setTimeout(()=>renderPrdEventsLog(ws),80);
-}
-/* ── Marketing routing panel: update WS badge + load routing ── */
+/* ── Marketing routing: update badge when WS scanned ── */
 if(dept==='Marketing'){
   const mktRb=$i('mkt-routing-ws-badge');
   if(mktRb) mktRb.textContent='· WS: '+ws;
-  routingRows=[];
-  const _hadSaved=loadRoutingForWs(ws);
-  if(!_hadSaved){renderRoutingTable();updateRoutingCount();}
-  syncRoutingSel(routingRows.length||0);
   const mktSb=$i('mkt-routing-sync-saved-badge');
   if(mktSb){const _rSt=getRoutingSt()[ws];mktSb.style.display=(_rSt&&_rSt.saved_to_sheets)?'inline':'none';}
+}
 }
 if(dept==='QC'){const _qel=$i('qc-noWs'); if(_qel) _qel.value=ws;
 renderQcBulkItems(ws);
@@ -5380,7 +5369,7 @@ function applyCustomRoutingCount(val){
   setRoutingCount(n);
 }
 function setRoutingCount(n){
-  const noWs=getRoutingWs();
+  const noWs=$i('prd-noWs')?.value||'';
   if(isNaN(n)||n<1){routingRows=[];renderRoutingTable();updateRoutingCount();return;}
   /* Preserve existing rows, only grow/shrink */
   while(routingRows.length<n){
@@ -5438,6 +5427,7 @@ function parseRoutingDurToHours(dur){
   if(m) return Number(m[1]);
   return 0;
 }
+
 
 /* ══ ROUTING HELPER — all routing is now in Marketing tab ══ */
 function getRoutingEl(id){return document.getElementById(id);}
@@ -5507,10 +5497,12 @@ function processScanRouting(ws){
   if(inp) inp.value='';
 }
 
+/* Scan WS for routing panel */
+
 function renderRoutingTable(){
   const tb=$i('mkt-routing-tbody');
   if(!tb) return;
-  const noWs=getRoutingWs();
+  const noWs=$i('prd-noWs')?.value||'—';
   const badge=$i('mkt-routing-ws-badge');
   if(badge) badge.textContent=noWs!=='—'?'· WS: '+noWs:'';
 
@@ -5584,30 +5576,12 @@ function renderRoutingTotalRow(){
 }
 
 function autoFillRoutingFromType(){
-  const noWs=getRoutingWs();
+  const noWs=$i('prd-noWs')?.value||'';
   if(!noWs){const m=$i('mkt-routing-msg');if(m){m.textContent='Scan WS dulu sebelum auto-fill.';m.className='smsg warn';}return;}
   routingRows=[];
-  /* Get WS type from Marketing event data for this WS */
-  const _mktEv=(typeof evs==='function'?evs():[]).filter(r=>r.no_ws===noWs&&r.department==='Marketing');
-  const _mktLast=_mktEv[_mktEv.length-1]||{};
-  const wsType=_mktLast.ws_type||'SINGLE';
-  /* For ASSEMBLING: get child WS list from assy_parts or ws_start/ws_end_suffix */
-  let assyParts=[];
+  const wsType=typeof prdType!=='undefined'?prdType:'SINGLE';
   if(wsType==='ASSEMBLING'){
-    try{
-      if(_mktLast.assy_parts) assyParts=JSON.parse(_mktLast.assy_parts);
-      else if(_mktLast.ws_start&&_mktLast.ws_end_suffix){
-        const m2=String(_mktLast.ws_start).match(/^(.+)-(\d+)$/);
-        if(m2){
-          const base=m2[1],sn=parseInt(m2[2]),en=parseInt(_mktLast.ws_end_suffix),pl=m2[2].length;
-          for(let n=sn;n<=en;n++) assyParts.push({ws:base+'-'+String(n).padStart(pl,'0'),partName:''});
-        }
-      }
-    }catch(e){}
-    if(!assyParts.length) assyParts=[{ws:noWs,partName:'Assembly'}];
-  }
-  if(wsType==='ASSEMBLING'){
-    const parts=assyParts;
+    const parts=typeof assyPartRows!=='undefined'&&assyPartRows.length?assyPartRows:[{ws:noWs,partName:'Assembly'}];
     parts.forEach(p=>{
       const id='rr'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
       routingRows.push({id,ws:p.ws||p.partName||noWs,op:'ASSY',dur:'',status:'IN PROGRESS'});
@@ -5626,11 +5600,9 @@ function autoFillRoutingFromType(){
 
 /* ── VALIDATION ── */
 function validateRoutingRows(){
-  /* Check both Marketing and Production routing panels */
-  const mktBadge=($i('mkt-routing-ws-badge')?.textContent||'').replace('· WS:','').trim();
-  const prdNoWs=getRoutingWs();
-  const noWs=mktBadge||prdNoWs;
-  if(!noWs) return 'Scan WS terlebih dahulu.';
+  /* Routing is only in Marketing tab now */
+  const noWs=getRoutingWs();
+  if(!noWs) return 'Scan WS di Routing Process terlebih dahulu.';
   if(!routingRows.length) return 'Routing table kosong. Pilih jumlah routing dulu.';
   const invalid=routingRows.filter(r=>!r.op||!r.dur);
   if(invalid.length){
@@ -9302,7 +9274,7 @@ window.useCamResult=function(){
     return;
   }
 
-  /* Special: mkt-routing camera scan → route to processScanRouting */
+  /* Special: mkt-routing camera scan */
   if(dept==='mkt-routing'){
     closeCamScan();
     setTimeout(function(){
