@@ -2925,6 +2925,16 @@ body::before{
 <!-- ── QR FINDER (Marketing) ── -->
 <!-- ═══ ROUTING PROCESS TABLE (Marketing) ═══ -->
 <!-- ═══ ROUTING PROCESS TABLE ═══ -->
+<input type="hidden" id="mkt-noWs">
+<div class="scan-bar" id="mkt-routing-scan-bar" style="margin-bottom:14px;border-color:color-mix(in srgb,var(--mkt) 30%,transparent)">
+<div class="scan-bar-title">📡 SCAN QR / NO_WS</div>
+<div class="scan-bar-row">
+<input class="scan-input" id="scan-Marketing" placeholder="Scan atau ketik NO_WS..." onkeydown="if(event.key==='Enter')processScan('Marketing')">
+<button class="btn btn-blue" onclick="processScan('Marketing')">🔍</button>
+<button class="btn btn-s cam-scan-btn" onclick="openCamScan('Marketing')" title="Scan QR dengan kamera iOS/Android">📷</button>
+</div>
+<div class="scan-result" id="sresult-Marketing"><div class="scan-layout"><div class="scan-thumb-col" id="sthumb-Marketing"></div><div class="scan-data"><div class="scan-grid" id="sdata-Marketing"></div><span class="scan-clear" onclick="clearScan('Marketing')">✕ Clear</span></div></div></div>
+</div>
 <div class="sc" id="mkt-routing-panel" style="border-color:color-mix(in srgb,var(--mkt) 30%,transparent)">
 <h3 style="color:var(--mkt)">🗂️ Routing Process <span id="mkt-routing-ws-badge" style="font-weight:400;color:var(--muted);font-size:10px"></span></h3>
 <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px;padding:6px 9px;background:color-mix(in srgb,var(--mkt) 6%,var(--card));border-radius:4px;border-left:2px solid var(--mkt)">
@@ -4415,15 +4425,23 @@ function updateMobileNav(el){
   else if(el.classList && el.classList.contains('mn-item')) el.classList.add('active');
 }
 
+/* ── Routing panel is shared markup between Marketing (mkt-*) and Production (prd-*).
+   curRoutingPrefix() decides which set of DOM ids to target based on the active division. ── */
+function curRoutingPrefix(){ return activeDept==='Marketing' ? 'mkt' : 'prd'; }
+function routingWsValue(px){
+  if(px==='mkt') return $i('mkt-noWs')?.value || ($i('mkt-routing-ws-badge')?.textContent||'').replace('· WS:','').trim() || '';
+  return $i('prd-noWs')?.value || '';
+}
 /* addRoutingRow — manually add 1 routing row */
 function addRoutingRow(){
-  const noWs=$i('prd-noWs')?.value||'';
+  const px=curRoutingPrefix();
+  const noWs=routingWsValue(px);
   const id='rr'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
   routingRows.push({id,ws:noWs,op:'',dur:'',status:'IN PROGRESS'});
   syncRoutingSel(routingRows.length);
   renderRoutingTable();updateRoutingCount();
   /* Scroll routing table to bottom so new row is visible */
-  const tbl=document.getElementById('prd-routing-table');
+  const tbl=document.getElementById(px+'-routing-table');
   if(tbl) tbl.scrollIntoView({block:'end',behavior:'smooth'});
 }
 function openModal(id){$i(id).classList.add('open');}
@@ -5062,7 +5080,7 @@ $i('ppic-type-sync-sub').textContent=`WS: ${mkt.no_ws} · 1 part · Auto-sync da
 $i('ppic-type-sync-badge').textContent='SINGLE PART';
 $i('ppic-type-sync-badge').style.cssText='padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;background:color-mix(in srgb,var(--ppic) 18%,transparent);color:#c4b5fd;border:1px solid color-mix(in srgb,var(--ppic) 35%,transparent)';
 }}}
-const SF={Engineering:['eng-noWs','eng-customer','eng-noPo','eng-deadline','eng-part'],PPIC:['ppic-noWs','ppic-customer','ppic-noPo','ppic-deadline','ppic-part'],Production:['prd-noWs','prd-customer',null,null,'prd-part'],QC:['qc-noWs','qc-customer',null,null,'qc-part'],Accounting:['acc-noWs','acc-customer','acc-noPo',null,'acc-part']
+const SF={Engineering:['eng-noWs','eng-customer','eng-noPo','eng-deadline','eng-part'],PPIC:['ppic-noWs','ppic-customer','ppic-noPo','ppic-deadline','ppic-part'],Production:['prd-noWs','prd-customer',null,null,'prd-part'],QC:['qc-noWs','qc-customer',null,null,'qc-part'],Accounting:['acc-noWs','acc-customer','acc-noPo',null,'acc-part'],Marketing:['mkt-noWs',null,null,null,null]
 };
 function processScan(dept){const inp=$i('scan-'+dept); const ws=inp.value.trim(); if(!ws) return;
 const events=evs();
@@ -5108,8 +5126,11 @@ if(dept==='Production'){
   syncRoutingSel(routingRows.length||0);
   setTimeout(()=>renderPrdEventsLog(ws),80);
 }
-/* ── Marketing routing panel: update WS badge when scanned ── */
+/* ── Marketing routing panel: update WS badge + load routing table when scanned ── */
 if(dept==='Marketing'){
+  routingRows=[];
+  const _hadSavedMkt=loadRoutingForWs(ws);
+  if(!_hadSavedMkt){renderRoutingTable();updateRoutingCount();}
   const mktRb=$i('mkt-routing-ws-badge');
   if(mktRb) mktRb.textContent='· WS: '+ws;
   const mktSb=$i('mkt-routing-sync-saved-badge');
@@ -5142,7 +5163,8 @@ const qcPartEl=$i('qc-part');if(qcPartEl)qcPartEl.value='';
 $i('qcBulkItems').innerHTML='<div style="padding:16px;text-align:center;color:var(--faint);font-size:11px">Scan WS terlebih dahulu untuk load material list dari PPIC.</div>';
 qcBulkStatus={};
 updateQcLockState();}
-if(dept==='Production'){const p=$i('prd-mat-panel'); if(p) p.style.display='none';}}
+if(dept==='Production'){const p=$i('prd-mat-panel'); if(p) p.style.display='none';}
+if(dept==='Marketing'){routingRows=[];const mktRb=$i('mkt-routing-ws-badge');if(mktRb)mktRb.textContent='';renderRoutingTable();updateRoutingCount();}}
 let massTarget='';
 function openMassModal(dept){massTarget=dept;$i('massInput').value='';$i('massResults').innerHTML='';openModal('massModal');}
 function processMassInput(){const lines=$i('massInput').value.split('\n').map(l=>l.trim()).filter(Boolean);
@@ -5380,14 +5402,16 @@ function saveRoutingSt(d){localStorage.setItem(RTK,JSON.stringify(d));}
 
 /* ── setRoutingCount: called when number selector changes ── */
 function syncRoutingSel(n){
-  const sel=$i('prd-routing-count-sel');
-  const customRow=$i('prd-routing-custom-row');
+  const px=curRoutingPrefix();
+  const sel=$i(px+'-routing-count-sel');
+  const customRow=$i(px+'-routing-custom-row');
   if(!sel) return;
   if(n<=10){sel.value=n||0;if(customRow)customRow.style.display='none';}
-  else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('prd-routing-custom-inp');if(ci)ci.value=n;}}
+  else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i(px+'-routing-custom-inp');if(ci)ci.value=n;}}
 }
 function handleRoutingCountChange(sel){
-  const customRow=$i('prd-routing-custom-row');
+  const px=curRoutingPrefix();
+  const customRow=$i(px+'-routing-custom-row');
   if(sel.value==='custom'){
     if(customRow) customRow.style.display='flex';
     /* Don't change rows yet — wait for user to type */
@@ -5402,7 +5426,8 @@ function applyCustomRoutingCount(val){
   setRoutingCount(n);
 }
 function setRoutingCount(n){
-  const noWs=$i('prd-noWs')?.value||'';
+  const px=curRoutingPrefix();
+  const noWs=routingWsValue(px);
   if(isNaN(n)||n<1){routingRows=[];renderRoutingTable();updateRoutingCount();return;}
   /* Preserve existing rows, only grow/shrink */
   while(routingRows.length<n){
@@ -5417,12 +5442,13 @@ function setRoutingCount(n){
 function delRoutingRow(id){
   routingRows=routingRows.filter(r=>r.id!==id);
   /* Sync selector */
-  const sel=$i('prd-routing-count-sel');
-  const customRow=$i('prd-routing-custom-row');
+  const px=curRoutingPrefix();
+  const sel=$i(px+'-routing-count-sel');
+  const customRow=$i(px+'-routing-custom-row');
   if(sel){
     const n=routingRows.length;
     if(n<=10){sel.value=n||0;if(customRow)customRow.style.display='none';}
-    else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i('prd-routing-custom-inp');if(ci)ci.value=n;}}
+    else{sel.value='custom';if(customRow){customRow.style.display='flex';const ci=$i(px+'-routing-custom-inp');if(ci)ci.value=n;}}
   }
   renderRoutingTable();updateRoutingCount();
 }
@@ -5433,12 +5459,14 @@ function rrSet(id,field,val){
 function clearRoutingRows(){
   if(routingRows.length&&!confirm('Clear semua routing rows?')) return;
   routingRows=[];
-  const sel=$i('prd-routing-count-sel');if(sel) sel.value=0;
-  const customRow=$i('prd-routing-custom-row');if(customRow)customRow.style.display='none';
+  const px=curRoutingPrefix();
+  const sel=$i(px+'-routing-count-sel');if(sel) sel.value=0;
+  const customRow=$i(px+'-routing-custom-row');if(customRow)customRow.style.display='none';
   renderRoutingTable();updateRoutingCount();
 }
 function updateRoutingCount(){
-  const el=$i('prd-routing-count');
+  const px=curRoutingPrefix();
+  const el=$i(px+'-routing-count');
   if(el) el.textContent=routingRows.length?routingRows.length+' step':'';
 }
 
@@ -5462,10 +5490,11 @@ function parseRoutingDurToHours(dur){
 }
 
 function renderRoutingTable(){
-  const tb=$i('prd-routing-tbody');
+  const px=curRoutingPrefix();
+  const tb=$i(px+'-routing-tbody');
   if(!tb) return;
-  const noWs=$i('prd-noWs')?.value||'—';
-  const badge=$i('prd-routing-ws-badge');
+  const noWs=routingWsValue(px)||'—';
+  const badge=$i(px+'-routing-ws-badge');
   if(badge) badge.textContent=noWs!=='—'?'· WS: '+noWs:'';
 
   if(!routingRows.length){
@@ -5505,45 +5534,54 @@ ${stOptsFor(r.status)}
   const fmtDays=totalDays%1===0?totalDays.toFixed(0):totalDays.toFixed(1);
   const fmtHrs=totalHrs%1===0?totalHrs.toFixed(0):totalHrs.toFixed(1);
   const totalRow=document.createElement('tr');
-  totalRow.id='routing-total-row';
-  totalRow.style.cssText='background:color-mix(in srgb,var(--prd) 10%,var(--card));border-top:2px solid var(--prd);font-weight:700';
+  totalRow.id=px+'-routing-total-row';
+  totalRow.style.cssText=`background:color-mix(in srgb,var(--${px}) 10%,var(--card));border-top:2px solid var(--${px});font-weight:700`;
   totalRow.innerHTML=`
-<td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--prd);letter-spacing:.5px;padding:6px 4px" colspan="1">∑</td>
-<td style="font-family:var(--mono);font-size:11px;color:var(--prd);padding:6px 8px" colspan="1"><span style="font-size:9px;color:var(--muted)">TOTAL</span></td>
-<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${totalOps}</b> <span style="font-size:10px;color:var(--muted);font-weight:400">operation</span></td>
-<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${fmtHrs} jam</b>${totalOps>0?`<span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:6px">≈ ${fmtDays} hari kerja</span>`:''}
+<td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--${px});letter-spacing:.5px;padding:6px 4px" colspan="1">∑</td>
+<td style="font-family:var(--mono);font-size:11px;color:var(--${px});padding:6px 8px" colspan="1"><span style="font-size:9px;color:var(--muted)">TOTAL</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--${px});padding:6px 8px"><b>${totalOps}</b> <span style="font-size:10px;color:var(--muted);font-weight:400">operation</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--${px});padding:6px 8px"><b>${fmtHrs} jam</b>${totalOps>0?`<span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:6px">≈ ${fmtDays} hari kerja</span>`:''}
 </td>
 <td style="padding:6px 8px;font-size:10px;color:var(--muted);font-family:var(--mono)">8 jam/hari</td>`;
   tb.appendChild(totalRow);
 
-  if(typeof updateRoutingGuidelineBar==='function') updateRoutingGuidelineBar();
+  if(px==='prd'&&typeof updateRoutingGuidelineBar==='function') updateRoutingGuidelineBar();
 }
 
 function renderRoutingTotalRow(){
   /* Lightweight: only re-render the total row without full table rebuild */
+  const px=curRoutingPrefix();
   const totalHrs=routingRows.reduce((s,r)=>s+parseRoutingDurToHours(r.dur),0);
   const totalOps=routingRows.filter(r=>r.op).length;
   const totalDays=totalHrs/8;
   const fmtDays=totalDays%1===0?totalDays.toFixed(0):totalDays.toFixed(1);
   const fmtHrs=totalHrs%1===0?totalHrs.toFixed(0):totalHrs.toFixed(1);
-  const row=document.getElementById('routing-total-row');
+  const row=document.getElementById(px+'-routing-total-row');
   if(!row) return;
   row.innerHTML=`
-<td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--prd);letter-spacing:.5px;padding:6px 4px" colspan="1">∑</td>
-<td style="font-family:var(--mono);font-size:11px;color:var(--prd);padding:6px 8px" colspan="1"><span style="font-size:9px;color:var(--muted)">TOTAL</span></td>
-<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${totalOps}</b> <span style="font-size:10px;color:var(--muted);font-weight:400">operation</span></td>
-<td style="font-family:var(--mono);font-size:12px;color:var(--prd);padding:6px 8px"><b>${fmtHrs} jam</b>${totalOps>0?`<span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:6px">≈ ${fmtDays} hari kerja</span>`:''}
+<td style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--${px});letter-spacing:.5px;padding:6px 4px" colspan="1">∑</td>
+<td style="font-family:var(--mono);font-size:11px;color:var(--${px});padding:6px 8px" colspan="1"><span style="font-size:9px;color:var(--muted)">TOTAL</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--${px});padding:6px 8px"><b>${totalOps}</b> <span style="font-size:10px;color:var(--muted);font-weight:400">operation</span></td>
+<td style="font-family:var(--mono);font-size:12px;color:var(--${px});padding:6px 8px"><b>${fmtHrs} jam</b>${totalOps>0?`<span style="font-size:10px;color:var(--muted);font-weight:400;margin-left:6px">≈ ${fmtDays} hari kerja</span>`:''}
 </td>
 <td style="padding:6px 8px;font-size:10px;color:var(--muted);font-family:var(--mono)">8 jam/hari</td>`;
 }
 
 function autoFillRoutingFromType(){
-  const noWs=$i('prd-noWs')?.value||'';
-  if(!noWs){const m=$i('prd-routing-msg');if(m){m.textContent='Scan WS dulu sebelum auto-fill.';m.className='smsg warn';}return;}
+  const px=curRoutingPrefix();
+  const noWs=routingWsValue(px);
+  if(!noWs){const m=$i(px+'-routing-msg');if(m){m.textContent='Scan WS dulu sebelum auto-fill.';m.className='smsg warn';}return;}
   routingRows=[];
-  const wsType=typeof prdType!=='undefined'?prdType:'SINGLE';
+  let wsType='SINGLE';
+  if(px==='prd'){
+    wsType=typeof prdType!=='undefined'?prdType:'SINGLE';
+  } else {
+    /* Marketing: look up the order's own ws_type from its saved event record */
+    const _ev=typeof evs==='function'?evs().find(r=>r.no_ws===noWs&&r.department==='Marketing'):null;
+    wsType=(_ev&&_ev.ws_type==='ASSEMBLING')?'ASSEMBLING':'SINGLE';
+  }
   if(wsType==='ASSEMBLING'){
-    const parts=typeof assyPartRows!=='undefined'&&assyPartRows.length?assyPartRows:[{ws:noWs,partName:'Assembly'}];
+    const parts=(px==='prd'&&typeof assyPartRows!=='undefined'&&assyPartRows.length)?assyPartRows:[{ws:noWs,partName:'Assembly'}];
     parts.forEach(p=>{
       const id='rr'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
       routingRows.push({id,ws:p.ws||p.partName||noWs,op:'ASSY',dur:'',status:'IN PROGRESS'});
@@ -5556,16 +5594,14 @@ function autoFillRoutingFromType(){
   }
   syncRoutingSel(routingRows.length);
   renderRoutingTable();updateRoutingCount();
-  const m=$i('prd-routing-msg');
+  const m=$i(px+'-routing-msg');
   if(m){m.textContent=`✓ Auto-filled ${routingRows.length} routing step untuk WS ${noWs}.`;m.className='smsg ok';}
 }
 
 /* ── VALIDATION ── */
 function validateRoutingRows(){
-  /* Check both Marketing and Production routing panels */
-  const mktBadge=($i('mkt-routing-ws-badge')?.textContent||'').replace('· WS:','').trim();
-  const prdNoWs=$i('prd-noWs')?.value||'';
-  const noWs=mktBadge||prdNoWs;
+  const px=curRoutingPrefix();
+  const noWs=routingWsValue(px);
   if(!noWs) return 'Scan WS terlebih dahulu.';
   if(!routingRows.length) return 'Routing table kosong. Pilih jumlah routing dulu.';
   const invalid=routingRows.filter(r=>!r.op||!r.dur);
@@ -5597,20 +5633,16 @@ function updateRoutingGuidelineBar(){
 async function saveRoutingToSheets(){
   const errMsg=validateRoutingRows();
   /* Detect which panel is active - Marketing or Production */
-  const isMkt=document.getElementById('mkt-routing-panel')&&
-    document.getElementById('dept-Marketing')&&
-    document.getElementById('dept-Marketing').classList.contains('active');
-  const msgId=isMkt?'mkt-routing-msg':'prd-routing-msg';
-  const wsInputId=isMkt?'mkt-noWs':'prd-noWs';
+  const px=curRoutingPrefix();
+  const isMkt=px==='mkt';
+  const msgId=px+'-routing-msg';
   if(errMsg){
     const m=$i(msgId);
     if(m){m.textContent='⚠️ '+errMsg;m.className='smsg err';}
     return;
   }
-  /* Get noWs from routing badge (set when WS scanned) */
-  const _badge=$i(isMkt?'mkt-routing-ws-badge':'prd-routing-ws-badge');
-  const _badgeTxt=(_badge?.textContent||'').replace('· WS:','').trim();
-  const noWs=_badgeTxt||($i('prd-noWs')?.value||'');
+  /* Get noWs from routing badge/hidden field (set when WS scanned) */
+  const noWs=routingWsValue(px);
   const m=$i(msgId);
   if(m){m.textContent='⏳ Menyimpan routing…';m.className='smsg info';}
 
@@ -5647,13 +5679,13 @@ async function saveRoutingToSheets(){
   }
   if(m){m.textContent=`✓ Routing ${noWs} tersimpan! ${ok}/${rows.length} step → Sheet "RoutingProcess"${fail>0?' ('+fail+' gagal)':''}`;m.className=fail>0?'smsg warn':'smsg ok';}
   if(typeof showToast==='function') showToast(`✓ Routing ${noWs} → Supabase (${ok} step)`,'ok');
-  const savedBadge=$i('prd-routing-sync-saved-badge');if(savedBadge) savedBadge.style.display='inline';
-  updateRoutingGuidelineBar();
-  renderPrdEventsLog(noWs);
+  const savedBadge=$i(px+'-routing-sync-saved-badge');if(savedBadge) savedBadge.style.display='inline';
+  if(px==='prd'){updateRoutingGuidelineBar();renderPrdEventsLog(noWs);}
 }
 
 /* ── LOAD ROUTING FROM LOCALSTORAGE for a given WS ── */
 function loadRoutingForWs(ws){
+  const px=curRoutingPrefix();
   const st=getRoutingSt();
   const saved=st[ws];
   if(saved&&saved.rows&&saved.rows.length){
@@ -5666,9 +5698,9 @@ function loadRoutingForWs(ws){
     }));
     syncRoutingSel(routingRows.length);
     renderRoutingTable();updateRoutingCount();
-    const savedBadge=$i('prd-routing-sync-saved-badge');
+    const savedBadge=$i(px+'-routing-sync-saved-badge');
     if(savedBadge) savedBadge.style.display=saved.saved_to_sheets?'inline':'none';
-    const msg=$i('prd-routing-msg');
+    const msg=$i(px+'-routing-msg');
     if(msg){msg.textContent=`✓ Loaded ${routingRows.length} routing step tersimpan untuk WS ${ws}.`;msg.className='smsg ok';}
     return true;
   }
