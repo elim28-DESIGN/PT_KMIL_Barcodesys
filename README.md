@@ -1,187 +1,67 @@
-# PT KMIL — WS Barcode & Tracking System
+# PT KMIL — ERP System
 
-> Sistem manajemen Work Sheet (WS) berbasis web untuk PT KMIL.  
-> Pencatatan event antar divisi, QR barcode, routing proses produksi, dan dashboard tracking real-time.
+Single-file web app (HTML/CSS/JS) untuk mengelola alur kerja manufaktur PT KMIL — mulai dari Marketing (order masuk) sampai Accounting (closing), dengan Supabase sebagai backend penyimpanan data.
 
-**🔗 Live:** https://elim28-design.github.io/PT_KMIL_Barcodesys/  
-**📊 Tracking:** https://elim28-design.github.io/PT_KMIL_Barcodesys/tracking.html
+**Versi saat ini:** `V45.3`
+**Live app:** https://elim28-design.github.io/PT_KMIL_Barcodesys/
 
 ---
 
-## Fitur
+## 📋 Divisi yang didukung
 
-| Fitur | Keterangan |
+| Divisi | Fungsi utama |
 |---|---|
-| Multi-divisi | Marketing, Engineering, PPIC, Purchasing, Production, QC, Accounting |
-| Real-time sync | Semua PC otomatis sinkron via Supabase — tanpa konfigurasi |
-| QR Code & Barcode | Generate dan print label WS |
-| Routing Process | Tracking urutan operasi di Production |
-| Tracking Dashboard | Kanban board + Timeline per WS, light/dark mode |
-| Offline-first | Data cache di localStorage, sync ke cloud saat online |
+| 📋 Marketing | Input order baru (Single Part / Assembling), generate & print QR Code, Routing Process |
+| 🛠️ Engineering | Review drawing, approve WS |
+| 📦 PPIC | Material planning per WS |
+| 🏭 Production | Serah terima antar proses, Routing Process, tracking downtime |
+| ✅ QC | Inspeksi & bulk item check |
+| 💰 Accounting | Closing WS |
+| 📡 Track WS | Cari histori event per NO_WS (scan manual / kamera) |
+
+Setiap divisi (kecuali Marketing & Dashboard) punya login gate dengan kredensial masing-masing.
 
 ---
 
-## File
+## ⚙️ Arsitektur teknis
 
-```
-PT_KMIL_Barcodesys/
-├── index.html       ← Aplikasi utama (input event semua divisi)
-├── tracking.html    ← Dashboard Kanban & Timeline
-└── README.md
-```
+- **Frontend:** 1 file `index.html` — HTML + CSS + vanilla JS, tanpa build step, tanpa dependency eksternal (selain font Inter & JetBrains Mono).
+- **Backend:** Supabase (REST API) untuk penyimpanan event/data utama. Sebagian data lama masih memakai Google Apps Script (GAS) dengan JSONP untuk menghindari CORS — **selalu redeploy GAS sebagai versi baru** setiap kali endpoint diubah, karena URL Web App lama tidak otomatis update.
+- **Local cache:** `localStorage` dipakai untuk cache event, routing state per WS, dan draft form sebelum tersimpan ke Supabase.
+- **QR Scanning:** kamera browser (`getUserMedia`) dengan fallback input manual, dipakai di semua divisi lewat tombol 📷 di panel "📡 SCAN QR / NO_WS".
 
 ---
 
-## Arsitektur
+## 🆕 Changelog
 
-```
-Browser (index.html / tracking.html)
-    │
-    ├── localStorage  ← offline cache
-    │
-    └── Supabase REST API
-            │
-            └── PostgreSQL (Singapore)
-                    ├── events
-                    └── routing_process
-```
+### V45.3 — Marketing Routing Process fix + Scan QR/NO_WS
+**Bug fix:**
+- Tombol-tombol di panel Routing Process Marketing (selector *Jumlah Routing*, ⚡ Auto-fill, 🗑 Clear, 💾 Save Routing to Supabase, + Add Row) sebelumnya tidak berfungsi karena semua fungsi JS terkait routing (`addRoutingRow`, `setRoutingCount`, `renderRoutingTable`, `autoFillRoutingFromType`, `saveRoutingToSheets`, dll.) hardcode ke DOM ID divisi Production (`prd-*`) alih-alih menyesuaikan divisi yang sedang aktif.
+- `saveRoutingToSheets()` juga salah deteksi divisi aktif karena mengecek `document.getElementById('dept-Marketing')`, sebuah elemen yang tidak pernah ada di markup manapun — sehingga fungsi ini selalu mengira sedang berada di Production.
+- Diperbaiki dengan helper `curRoutingPrefix()` yang membaca variabel `activeDept` untuk menentukan target DOM (`mkt-*` vs `prd-*`) secara dinamis di semua fungsi routing terkait.
 
-Tidak ada server sendiri.  
-**GitHub Pages** = static hosting.  
-**Supabase** = database cloud PostgreSQL.
+**Fitur baru:**
+- Panel **📡 SCAN QR / NO_WS** ditambahkan ke Routing Process Marketing, konsisten dengan pola yang sudah ada di Engineering/PPIC/Production/QC/Accounting — termasuk tombol 📷 untuk scan QR lewat kamera HP (iOS Safari & Android Chrome).
+- Setelah scan, WS badge dan tabel Routing Process Marketing otomatis termuat/reset sesuai WS yang di-scan (mengambil data tersimpan dari `localStorage` jika ada).
 
----
+**Cakupan perubahan:** hanya menyentuh section Marketing + fungsi JS routing yang dipakai bersama (shared). Panel/fungsi divisi Engineering, PPIC, Production, QC, dan Accounting tidak diubah.
 
-## Database
-
-**Project ID:** `ltxjikrlcnyfyzlsvxof`  
-**Region:** Southeast Asia (Singapore)  
-**Plan:** Free (500 MB database, cukup untuk jutaan rows)
-
-### Tabel `events`
-
-| Kolom | Keterangan |
-|---|---|
-| `id` | Primary key (auto) |
-| `ts` | Timestamp ISO 8601 |
-| `department` | Divisi pencatat |
-| `event` | Nama event |
-| `no_ws` | Nomor Work Sheet |
-| `no_po` | Nomor Purchase Order |
-| `customer` | Nama customer |
-| `part` | Nama part/komponen |
-| `operation` | Operasi mesin |
-| `ws_type` | REGULER / ASSEMBLING |
-| `qty` | Jumlah |
-| `user` | Nama operator |
-| `status` | Status WS |
-| `deadline` | Tanggal deadline |
-| `remarks` | Catatan |
-| `unit_set` | Unit/set (Marketing) |
-| `assy_parts` | Parts assembling |
-| `assy_qty_json` | Qty parts (JSON) |
-| `ws_start` | WS awal range |
-| `ws_end_suffix` | WS akhir range |
-
-### Tabel `routing_process`
-
-| Kolom | Keterangan |
-|---|---|
-| `id` | Primary key (auto) |
-| `no_ws` | Nomor Work Sheet |
-| `routing_seq` | Urutan operasi |
-| `routing_op` | Nama operasi |
-| `routing_dur` | Estimasi durasi |
-| `routing_status` | PENDING / IN PROGRESS / DONE |
-| `user` | Operator |
-| `department` | Divisi |
-| `ts` | Timestamp |
-| `saved_at` | Waktu disimpan |
+### V45.2 dan sebelumnya
+- Login gate per divisi dengan kredensial spesifik.
+- Format tanggal Deadline PO (ISO → format Indonesia).
+- Perbaikan tipografi Dashboard.
+- `clearDivision()` untuk reset seluruh form state per divisi.
+- Migrasi sebagian penyimpanan routing/backend ke Supabase.
+- V44: overhaul UI (font Inter + JetBrains Mono, data lebih bold, border lebih tebal), QR work order card printing, Downtime tracker per-mesin, tombol Clear di semua form divisi.
 
 ---
 
-## Setup Supabase (jika perlu reset)
+## 🚀 Deploy
 
-Jalankan di **Supabase → SQL Editor:**
+1. Upload `index.html` ke branch GitHub Pages (`elim28-design.github.io/PT_KMIL_Barcodesys/`).
+2. Jika ada perubahan pada backend GAS, **redeploy sebagai versi Web App baru** — URL lama tidak otomatis mengambil kode terbaru.
+3. Tidak ada build step; file bisa langsung dibuka di browser atau di-host sebagai static file.
 
-```sql
--- Tabel Events
-create table if not exists events (
-  id bigserial primary key,
-  ts text, department text, event text, revisi text,
-  no_ws text, no_po text, customer text, part text,
-  operation text, ws_type text, qty text, "user" text,
-  ws_turun text, ws_turun_detail text, parsial text,
-  parsial_qty text, parsial_sisa text, mat_count text,
-  drawing_filename text, deadline text, remarks text,
-  status text, shift text, ws_type_prd text,
-  assy_parts_summary text, qc_bulk text, sj_filename text,
-  assy_turun text, ws_start text, ws_end_suffix text,
-  unit_set text, assy_qty_json text, assy_parts text,
-  created_at timestamptz default now()
-);
+## 🐞 Reporting bug
 
--- Tabel Routing
-create table if not exists routing_process (
-  id bigserial primary key,
-  ts text, no_ws text, routing_seq integer,
-  routing_ws_ref text, routing_op text, routing_dur text,
-  routing_status text, "user" text, department text,
-  event text, saved_at text,
-  created_at timestamptz default now()
-);
-
--- Row Level Security
-alter table events enable row level security;
-alter table routing_process enable row level security;
-create policy "allow all" on events for all using (true) with check (true);
-create policy "allow all" on routing_process for all using (true) with check (true);
-```
-
----
-
-## Flow WS antar Divisi
-
-```
-Marketing ──► Engineering ──► PPIC ──► Production ──► QC ──► Accounting
-   │               │            │           │           │
- WS Created    Drawing       BOM &      Routing      Inspeksi    Delivered
- Order         Released    Material     Process      QC OK/NG
-```
-
----
-
-## Deploy
-
-Website otomatis update saat push ke branch `main`:
-
-```bash
-git add index.html tracking.html README.md
-git commit -m "Update: deskripsi perubahan"
-git push origin main
-```
-
-Tunggu 1–2 menit → live site terupdate.
-
----
-
-## Changelog
-
-### V43 — Supabase Integration (current)
-- ✅ Migrasi dari Google Apps Script ke Supabase PostgreSQL
-- ✅ Auto-sync real-time — tidak perlu isi URL di setiap PC
-- ✅ Semua tombol "Save to Sheets" → "Save to Supabase"
-- ✅ `tracking.html` — Kanban board + Timeline dengan light/dark mode
-- ✅ Font formal IBM Plex (tracking dashboard)
-- ✅ Fix routing_process save ke Supabase
-- ✅ Fix missing columns (unit_set, assy_parts, assy_qty_json)
-
-### V42.1 — GAS Fixes
-- Fix listRouting handler
-- Fix filter ts di fetchFromSheets
-- Fix dedup composite key no_ws+ts
-
-### V42 — Multi-divisi
-- Tambah Engineering, PPIC, Purchasing, QC, Accounting
-- Routing Process Production
-- Assembling WS range generator
+Sertakan: divisi yang bermasalah, langkah reproduksi, dan screenshot/console error jika ada — supaya lebih cepat ditelusuri ke DOM ID / fungsi JS yang relevan.
